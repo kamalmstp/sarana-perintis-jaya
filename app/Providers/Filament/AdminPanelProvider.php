@@ -66,6 +66,7 @@ class AdminPanelProvider extends PanelProvider
             ->when($this->settings->registration_enabled ?? true, fn($panel) => $panel->registration())
             ->when($this->settings->password_reset_enabled ?? true, fn($panel) => $panel->passwordReset())
             ->brandLogo(asset('img/logo_banner.png'))
+            ->favicon(asset('img/icon.ico'))
             ->darkModeBrandLogo(asset('img/logo_banner.png'))
             ->brandLogoHeight('2rem')
             ->emailVerification()

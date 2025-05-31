@@ -17,7 +17,7 @@ class OrderDetailResource extends Resource
 {
     protected static ?string $model = OrderDetail::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Order (Trucking)';
     protected static ?int $navigationSort = 4;

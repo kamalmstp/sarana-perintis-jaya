@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Driver extends Model
 {
@@ -25,4 +28,9 @@ class Driver extends Model
     protected $guarded = ['id'];
     // add hidden
     protected $hidden = ['created_at', 'updated_at'];
+
+    public function order_detail(): HasMany
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }

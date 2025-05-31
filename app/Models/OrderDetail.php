@@ -15,6 +15,7 @@ class OrderDetail extends Model
     protected $fillable = [
       'order_proses_id',
       'truck_id',
+      'driver_id',
       'date_detail',
       'bag_send',
       'bag_received',
@@ -31,7 +32,12 @@ class OrderDetail extends Model
     
     public function trucks(): BelongsTo
     {
-        return $this->belongsTo(Truck::class);
+        return $this->belongsTo(Truck::class, 'truck_id');
+    }
+
+    public function drivers(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class, 'driver_id');
     }
     
     public function order_proses(): BelongsTo

@@ -21,6 +21,7 @@ class OrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Order Management';
+    protected static ?string $navigationLabel = 'Order (SPK)';
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -31,6 +32,8 @@ class OrderResource extends Resource
                     ->label('Customer')
                     ->relationship(name: 'customers', titleAttribute:'name')
                     ->searchable()
+                    ->preload()
+                    ->createOptionForm(fn (Form $form) => CustomerResource::form($form))
                     ->required(),
                 Forms\Components\TextInput::make('spk_number')
                     ->label('No SPK')
@@ -60,6 +63,8 @@ class OrderResource extends Resource
                     ->label('Lokasi Muat')
                     ->relationship(name:'locations', titleAttribute:'address')
                     ->searchable()
+                    ->preload()
+                    ->createOptionForm(fn (Form $form) => LocationResource::form($form))
                     ->default(null),
                 Forms\Components\Textarea::make('note')
                     ->label('Keterangan')

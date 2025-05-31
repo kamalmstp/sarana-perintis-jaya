@@ -19,6 +19,7 @@ class OrderProsesResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Order Management';
+    protected static ?string $navigationLabel = 'Order (DO/PO/SO)';
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
@@ -29,6 +30,7 @@ class OrderProsesResource extends Resource
                     ->label('No SPK')
                     ->relationship(name:'orders', titleAttribute:'spk_number')
                     ->searchable()
+                    ->preload()
                     ->required(),
                 Forms\Components\TextInput::make('do_number')
                     ->label('No DO')
@@ -57,6 +59,9 @@ class OrderProsesResource extends Resource
                 Forms\Components\Select::make('delivery_location_id')
                     ->label('Lokasi Tujuan')
                     ->relationship(name:'locations', titleAttribute:'address')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm(fn (Form $form) => LocationResource::form($form))
                     ->required(),
                 Forms\Components\Select::make('type_proses')
                     ->label('Proses')
@@ -95,8 +100,8 @@ class OrderProsesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('order_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('orders.spk_number')
+                    ->label('No SPK')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('do_number')
                     ->searchable(),
@@ -105,8 +110,8 @@ class OrderProsesResource extends Resource
                 Tables\Columns\TextColumn::make('total_kg_proses')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('delivery_location_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('locations.address')
+                    ->label('Lokasi Tujuan')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_status'),
                 Tables\Columns\TextColumn::make('created_at')
@@ -122,8 +127,9 @@ class OrderProsesResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-   Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make(),
 
             ])
             ->bulkActions([
@@ -145,6 +151,7 @@ class OrderProsesResource extends Resource
         return [
             'index' => Pages\ListOrderProses::route('/'),
             'create' => Pages\CreateOrderProses::route('/create'),
+            'view' => Pages\ViewOrderProses::route('/{record}'),
             'edit' => Pages\EditOrderProses::route('/{record}/edit'),
         ];
     }

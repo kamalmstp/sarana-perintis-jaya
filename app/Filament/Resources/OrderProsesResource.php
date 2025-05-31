@@ -80,8 +80,7 @@ class OrderProsesResource extends Resource
                     ->options([
                         'bongkar' => 'Bongkar',
                         'teruskan' => 'Teruskan'
-                      ])
-                    ->required(),
+                      ]),
                 Forms\Components\TextInput::make('total_container_proses')
                     ->label('Jumlah Container')
                     ->numeric()

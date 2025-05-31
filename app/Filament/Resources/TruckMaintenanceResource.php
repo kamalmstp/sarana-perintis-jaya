@@ -27,20 +27,28 @@ class TruckMaintenanceResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nama Pengeluaran')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('truck_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Select::make('truck_id')
+                    ->label('No Polisi')
+                    ->relationship('trucks','plate_number')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm(fn (Form $form) => TruckResource::form($form))
+                    ->required(),
                 Forms\Components\DatePicker::make('date')
+                    ->label('Tanggal')
                     ->required(),
                 Forms\Components\TextInput::make('qty')
+                    ->label('Jumlah')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('price')
+                    ->label('Harga')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('Rp'),
             ]);
     }
 

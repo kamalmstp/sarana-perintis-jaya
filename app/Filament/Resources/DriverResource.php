@@ -52,7 +52,7 @@ class DriverResource extends Resource
                     ->default('karyawan')
                     ->options([
                         'karyawan' => 'Karyawan',
-                        'venndor' => 'Vendor'
+                        'vendor' => 'Vendor'
                       ])
                     ->required(),
                 Forms\Components\TextInput::make('identity_number')

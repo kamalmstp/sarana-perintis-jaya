@@ -27,9 +27,28 @@ class ManageOrderDetail extends ManageRelatedRecords
     //     return $this->getResource()::getUrl('index');
     // }
 
+    public function form(Form $form): Form
+    {
+        return OrderDetailResource::form($form);
+    }
+
     public function table(Table $table): Table
     {
-        return OrderDetailResource::table($table);
+        return OrderDetailResource::table($table)
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('New Data')
+                    ->icon('heroicon-o-plus-circle')
+                    ->fillForm(function (array $arguments): array {
+                        return [
+                            'order_proses_id'   => $this->getOwnerRecord()->id,
+                        ];
+                    })
+                    ->successNotification(
+                        Notification::make()
+                            ->success(),
+                    ),
+            ]);
     }
 
     public static function getNavigationLabel(): string

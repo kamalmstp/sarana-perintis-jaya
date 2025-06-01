@@ -4,10 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderProsesResource\Pages;
 use App\Filament\Resources\OrderProsesResource\RelationManagers;
+use App\Filament\Resources\OrderProsesResource\RelationManagers\OrderDetailRelationManager;
 use App\Models\OrderProses;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +26,8 @@ class OrderProsesResource extends Resource
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Order (DO/PO/SO)';
     protected static ?int $navigationSort = 3;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -138,10 +145,12 @@ class OrderProsesResource extends Resource
             ]);
     }
 
+
+
     public static function getRelations(): array
     {
         return [
-            //
+            OrderDetailRelationManager::class,
         ];
     }
 
@@ -152,6 +161,7 @@ class OrderProsesResource extends Resource
             'create' => Pages\CreateOrderProses::route('/create'),
             'view' => Pages\ViewOrderProses::route('/{record}'),
             'edit' => Pages\EditOrderProses::route('/{record}/edit'),
+//            'order-proses' => Pages\ManageOrderProses::route('/{record}/order-proses'),
         ];
     }
 }

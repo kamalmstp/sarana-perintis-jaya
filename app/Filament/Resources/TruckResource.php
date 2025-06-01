@@ -6,6 +6,7 @@ use Filament\GlobalSearch\Actions\Action;
 use Illuminate\Contracts\Support\Htmlable;
 use App\Filament\Resources\TruckResource\Pages;
 use App\Filament\Resources\TruckResource\RelationManagers;
+use App\Filament\Imports\TruckImporter;
 use App\Models\Truck;
 use Filament\Forms;
 use Filament\Forms\Form;

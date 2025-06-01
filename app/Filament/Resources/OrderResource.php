@@ -4,11 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\RelationManagers\OrderProsesRelationManager;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,6 +26,8 @@ class OrderResource extends Resource
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Order (SPK)';
     protected static ?int $navigationSort = 1;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -124,7 +129,7 @@ class OrderResource extends Resource
                     ->schema([
                         Infolists\Components\Section::make('Informasi Order')
                             ->schema([
-                                Infolists\Components\Grid::make(2)
+                                Infolists\Components\Grid::make()
                                     ->schema([
                                         Infolists\Components\TextEntry::make('spk_number')
                                             ->label('Nomor SPK')
@@ -141,13 +146,41 @@ class OrderResource extends Resource
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
-              ]);
+
+                Infolists\Components\Group::make()
+                    ->schema(
+                        [
+                            Infolists\Components\Section::make('Informasi Status')
+                                ->schema([
+                                    Infolists\Components\TextEntry::make('created_at')
+                                        ->label('Created at')
+                                        ->dateTime()
+                                        ->icon('heroicon-m-calendar'),
+                                    Infolists\Components\TextEntry::make('updated_at')
+                                        ->label('Updated at')
+                                        ->dateTime()
+                                        ->icon('heroicon-m-calendar-days'),
+                                ]),
+                        ]
+                    )
+                    ->columnSpan(['lg' => 1]),
+            ])
+            ->columns(3);
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewOrder::class,
+            Pages\EditOrder::class,
+            Pages\ManageOrderProses::class,
+        ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            OrderProsesRelationManager::class,
         ];
     }
 
@@ -158,6 +191,7 @@ class OrderResource extends Resource
             'create' => Pages\CreateOrder::route('/create'),
             'view' => Pages\ViewOrder::route('/{record}'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'order-proses' => Pages\ManageOrderProses::route('/{record}/order-proses'),
         ];
     }
 }

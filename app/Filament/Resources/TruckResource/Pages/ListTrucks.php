@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TruckResource\Pages;
 
 use App\Filament\Resources\TruckResource;
 use Filament\Actions;
+use App\Filament\Imports\TruckImporter;
 use Filament\Resources\Pages\ListRecords;
 
 class ListTrucks extends ListRecords
@@ -14,6 +15,8 @@ class ListTrucks extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\ImportAction::make()
+                ->importer(TruckImporter::class),
         ];
     }
 }

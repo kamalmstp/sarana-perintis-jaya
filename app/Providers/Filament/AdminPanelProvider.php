@@ -128,7 +128,7 @@ class AdminPanelProvider extends PanelProvider
                         ->image()
                         ->disk('public')
                 )
-                ->enableTwoFactorAuthentication(),
+                ->enableTwoFactorAuthentication(false),
         ];
 
         if ($this->settings->sso_enabled ?? true) {

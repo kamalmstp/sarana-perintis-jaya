@@ -5,10 +5,14 @@ namespace App\Filament\Resources\OrderResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use App\Filament\Resources\OrderProsesResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class OrderProsesRelationManager extends RelationManager
 {
@@ -19,40 +23,26 @@ class OrderProsesRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('order_id')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return OrderProsesResource::form($form);
     }
 
     public function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('order_id')
-            ->columns([
-                Tables\Columns\TextColumn::make('do_number')
-                    ->label('No DO'),
-                Tables\Columns\TextColumn::make('item_proses')
-                    ->label('Item'),
-                Tables\Columns\TextColumn::make('total_kg_proses')
-                    ->label('Qty (Kg)'),
-            ])
-            ->filters([
-                //
-            ])
+        return OrderProsesResource::table($table)
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                Tables\Actions\CreateAction::make()
+                    ->label('New Order')
+                    ->icon('heroicon-o-plus-circle')
+                    ->fillForm(function (array $arguments): array {
+                        return [
+                            'order_id'   => $this->getOwnerRecord()->id,
+                        ];
+                    })
+                    ->modalWidth('6xl')
+                    ->successNotification(
+                        Notification::make()
+                            ->success(),
+                    ),
             ]);
     }
 }

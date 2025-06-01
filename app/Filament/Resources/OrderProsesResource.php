@@ -7,6 +7,10 @@ use App\Filament\Resources\OrderProsesResource\RelationManagers;
 use App\Filament\Resources\OrderProsesResource\RelationManagers\OrderDetailRelationManager;
 use App\Models\OrderProses;
 use Filament\Forms;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
@@ -29,97 +33,162 @@ class OrderProsesResource extends Resource
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
+    
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('order_id')
-                    ->label('No SPK')
-                    ->relationship(name:'orders', titleAttribute:'spk_number')
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-                Forms\Components\TextInput::make('do_number')
-                    ->label('No DO')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('po_number')
-                    ->label('No PO')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('so_number')
-                    ->label('No SO')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('item_proses')
-                    ->label('Nama Barang')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('total_kg_proses')
-                    ->label('Quantity (Kg)')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('total_bag_proses')
-                    ->label('Quantity (Bag)')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\Select::make('delivery_location_id')
-                    ->label('Lokasi Tujuan')
-                    ->relationship(name:'locations', titleAttribute:'address')
-                    ->searchable()
-                    ->preload()
-                    ->createOptionForm(fn (Form $form) => LocationResource::form($form))
-                    ->required(),
-                Forms\Components\Select::make('type_proses')
-                    ->label('Proses')
-                    ->options([
-                        'gudang' => 'Gudang',
-                        'kapal' => 'Kapal',
-                        'Container' => 'Container'
-                      ])
-                    ->required(),
-                Forms\Components\TextInput::make('tarif')
-                    ->label('Tarif')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\Select::make('operation_proses')
-                    ->label('Container Proses')
-                    ->options([
-                        'bongkar' => 'Bongkar',
-                        'teruskan' => 'Teruskan'
-                      ]),
-                Forms\Components\TextInput::make('total_container_proses')
-                    ->label('Jumlah Container')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('vessel_name_proses')
-                    ->label('Nama Kapal')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\Textarea::make('note_proses')
-                    ->label('Keterangan')
-                    ->columnSpanFull(),
-            ]);
+                Group::make()
+                    ->schema([
+                        Section::make('Order DO/PO/SO')
+                            ->schema([
+                                Forms\Components\Select::make('order_id')
+                                ->label('No SPK')
+                                ->relationship(name:'orders', titleAttribute:'spk_number')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+
+                                Fieldset::make('Nomor Order')
+                                ->schema([
+                                    Forms\Components\TextInput::make('do_number')
+                                    ->label('DO')
+                                    ->maxLength(255)
+                                    ->default(null),
+                                    Forms\Components\TextInput::make('po_number')
+                                    ->label('PO')
+                                    ->maxLength(255)
+                                    ->default(null),
+                                    Forms\Components\TextInput::make('so_number')
+                                    ->label('SO')
+                                    ->maxLength(255)
+                                    ->default(null),
+                                ]),
+
+                                Fieldset::make('Informasi Barang')
+                                ->schema([
+                                    Forms\Components\TextInput::make('item_proses')
+                                        ->label('Item')
+                                        ->maxLength(255)
+                                        ->default(null),
+                                    Forms\Components\TextInput::make('total_kg_proses')
+                                        ->label('Quantity')
+                                        ->suffix('Kg')
+                                        ->numeric()
+                                        ->default(null),
+                                    Forms\Components\TextInput::make('total_bag_proses')
+                                        ->label('Quantity')
+                                        ->suffix('Bag')
+                                        ->numeric()
+                                        ->default(null),
+                                ]),
+
+                                Forms\Components\Select::make('delivery_location_id')
+                                ->label('Lokasi Tujuan')
+                                ->relationship(name:'locations', titleAttribute:'address')
+                                ->searchable()
+                                ->preload()
+                                ->createOptionForm(fn (Form $form) => LocationResource::form($form))
+                                ->required(),
+                            ]),
+                    ])
+                    ->columnSpan(['lg' => 2]),
+                
+                Group::make()
+                    ->schema([
+                        Section::make('Pengiriman')
+                            ->schema([
+                                Forms\Components\TextInput::make('tarif')
+                                ->label('Tarif')
+                                ->numeric()
+                                ->prefix('Rp')
+                                ->required(),
+
+                                Forms\Components\Select::make('type_proses')
+                                ->label('Tipe')
+                                ->options([
+                                    'gudang' => 'Gudang',
+                                    'kapal' => 'Kapal',
+                                    'container' => 'Container'
+                                ])
+                                ->searchable()
+                                ->preload()
+                                ->reactive()
+                                ->required(),
+
+                                Forms\Components\TextInput::make('warehouse_proses')
+                                ->label('Informasi Gudang')
+                                ->visible(fn(Get $get) => $get('type_proses') === 'gudang')
+                                ->default(null),
+
+                                Forms\Components\TextInput::make('vessel_name_proses')
+                                ->label('Nama Kapal')
+                                ->visible(fn(Get $get) => $get('type_proses') === 'kapal')
+                                ->default(null),
+
+                                Forms\Components\Select::make('operation_proses')
+                                ->label('Container Proses')
+                                ->visible(fn(Get $get) => $get('type_proses') === 'container')
+                                ->reactive()
+                                ->options([
+                                    'bongkar' => 'Bongkar',
+                                    'teruskan' => 'Teruskan'
+                                ]),
+
+                                Forms\Components\TextInput::make('total_container_proses')
+                                ->label('Jumlah Container')
+                                ->numeric()
+                                ->visible(fn(Get $get) => $get('type_proses') === 'container' && $get('operation_proses') === 'teruskan')
+                                ->default(null),
+
+                                Forms\Components\RichEditor::make('note_proses')
+                                ->label('Keterangan')
+                                ->columnSpanFull(),
+                            ]),
+                    ]),
+    
+            ])
+            ->columns(3);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('orders.spk_number')
-                    ->label('No SPK')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('do_number')
+                    ->label('Nomor')
+                    ->formatStateUsing(function ($record){
+                        return collect([
+                            $record->do_number ? "DO: {$record->do_number}" : "DO: -",
+                            $record->po_number ? "PO: {$record->po_number}" : "PO: -",
+                            $record->so_number ? "SO: {$record->so_number}" : "SO: -",
+                        ])->filter()->join('<br>');
+                    })->html()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('item_proses')
+                    ->label('Item')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('total_kg_proses')
-                    ->numeric()
+                    ->label('Quantity')
+                    ->formatStateUsing(function ($record){
+                        $kg = $record->total_kg_proses ? number_format($record->total_kg_proses, 0, '.', '.') . ' Kg' : '- Kg' ;
+                        $bag = $record->total_bag_proses ? number_format($record->total_bag_proses, 0, '.', '.') . ' Bag' : '- Bag' ;
+
+                        return collect([$kg, $bag])->filter()->join('<br>');
+                    })->html()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('locations.address')
-                    ->label('Lokasi Tujuan')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('invoice_status'),
+                // Tables\Columns\TextColumn::make('locations.address')
+                //     ->label('Lokasi Tujuan')
+                //     ->sortable(),
+                Tables\Columns\TextColumn::make('tarif')
+                    ->label('Tarif')
+                    ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))
+                    ->sortable()
+                    ->alignEnd(),
+                Tables\Columns\TextColumn::make('invoice_status')
+                    ->label('Status')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -145,7 +214,14 @@ class OrderProsesResource extends Resource
             ]);
     }
 
-
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewOrderProses::class,
+            Pages\EditOrderProses::class,
+            Pages\ManageOrderDetail::class,
+        ]);
+    }
 
     public static function getRelations(): array
     {
@@ -161,7 +237,7 @@ class OrderProsesResource extends Resource
             'create' => Pages\CreateOrderProses::route('/create'),
             'view' => Pages\ViewOrderProses::route('/{record}'),
             'edit' => Pages\EditOrderProses::route('/{record}/edit'),
-//            'order-proses' => Pages\ManageOrderProses::route('/{record}/order-proses'),
+            'order-detail' => Pages\ManageOrderDetail::route('/{record}/order-detail'),
         ];
     }
 }

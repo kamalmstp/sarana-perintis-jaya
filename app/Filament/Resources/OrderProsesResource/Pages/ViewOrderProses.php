@@ -16,4 +16,9 @@ class ViewOrderProses extends ViewRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Informasi';
+    }
 }

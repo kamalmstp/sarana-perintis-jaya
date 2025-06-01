@@ -21,6 +21,6 @@ class ViewOrder extends ViewRecord
 
     public static function getNavigationLabel(): string
     {
-        return 'informasi';
+        return 'Informasi';
     }
 }

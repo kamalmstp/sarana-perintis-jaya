@@ -81,21 +81,36 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customers.name')
+                Tables\Columns\TextColumn::make('customers.code')
                     ->label('Customer')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('spk_date')
+                    ->label('Tanggal')
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('spk_number')
                     ->label('No SPK')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('spk_date')
-                    ->label('Tanggal SPK')
-                    ->date()
-                    ->sortable(),
+                
                 Tables\Columns\TextColumn::make('delivery_term')
-                    ->label('Pengiriman'),
+                    ->label('Pengiriman')
+                    ->formatStateUsing(function ($state){
+                        return match ($state){
+                            'dtd' => 'Door to Door',
+                            'dtp' => 'Door to Port',
+                            'ptd' => 'Port to Door',
+                            'ptp' => 'Port to Port',
+                        };
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('total_kg')
-                    ->label('Quantity')
-                    ->numeric(),
+                    ->formatStateUsing(function ($record){
+                        $kg = $record->total_kg ? number_format($record->total_kg, 0, '.', '.') . ' Kg' : '- Kg' ;
+                        $bag = $record->total_bag ? number_format($record->total_bag, 0, '.', '.') . ' Bag' : '- Bag' ;
+
+                        return collect([$kg, $bag])->filter()->join('<br>');
+                    })->html()
+                    ->label('Quantity'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -131,18 +146,47 @@ class OrderResource extends Resource
                             ->schema([
                                 Infolists\Components\Grid::make()
                                     ->schema([
-                                        Infolists\Components\TextEntry::make('spk_number')
-                                            ->label('Nomor SPK')
-                                            ->icon('heroicon-o-users')
+                                        Infolists\Components\TextEntry::make('customers.name')
+                                            ->label('Customer')
+                                            ->icon('heroicon-o-building-office')
                                             ->listWithLineBreaks()
                                             ->placeholder('—'),
 
-                                        Infolists\Components\TextEntry::make('item')
-                                            ->label('Nama Barang')
+                                        Infolists\Components\TextEntry::make('spk_date')
+                                            ->label('Tanggal')
                                             ->icon('heroicon-o-calendar')
-                                            ->dateTime()
+                                            ->date()
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('spk_number')
+                                            ->label('Nomor SPK')
+                                            ->icon('heroicon-o-clipboard-document')
+                                            ->placeholder('—'),
+
+                                        Infolists\Components\TextEntry::make('delivery_term')
+                                            ->label('Pengiriman')
+                                            ->icon('heroicon-o-arrow-path')
+                                            ->formatStateUsing(function ($state){
+                                                    return match ($state){
+                                                        'dtd' => 'Door to Door',
+                                                        'dtp' => 'Door to Port',
+                                                        'ptd' => 'Port to Door',
+                                                        'ptp' => 'Port to Port',
+                                                    };
+                                                })
                                             ->placeholder('—'),
                                     ]),
+                                
+                                
+                                Infolists\Components\TextEntry::make('locations.address')
+                                    ->label('Lokasi Muat')
+                                    ->icon('heroicon-o-map')
+                                    ->placeholder('—'),
+                                
+                                Infolists\Components\TextEntry::make('note')
+                                    ->label('Catatan')
+                                    ->icon('heroicon-o-map')
+                                    ->placeholder('—'),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),

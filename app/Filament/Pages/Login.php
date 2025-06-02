@@ -61,8 +61,8 @@ class Login extends BaseLogin
         parent::mount();
 
         $this->form->fill([
-            'email' => 'admin@admin.com',
-            'password' => 'password',
+            'email' => '',
+            'password' => '',
             'remember' => true,
         ]);
     }

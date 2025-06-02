@@ -6,6 +6,7 @@ use App\Filament\Resources\DriverResource\Pages;
 use App\Filament\Resources\DriverResource\RelationManagers;
 use App\Models\Driver;
 use Filament\Forms;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Radio;
 use Filament\Resources\Resource;
@@ -49,26 +50,30 @@ class DriverResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('type')
                     ->label('Tipe')
-                    ->default('karyawan')
+                    ->default('vendor')
                     ->options([
+                        'vendor' => 'Vendor',
                         'karyawan' => 'Karyawan',
-                        'vendor' => 'Vendor'
                       ])
+                    ->reactive()
                     ->required(),
                 Forms\Components\TextInput::make('identity_number')
                     ->label('Nomor Identitas')
                     ->maxLength(255)
+                    ->visible(fn(Get $get) => $get('type') === 'karyawan')
                     ->default(null),
                 Forms\Components\TextInput::make('phone')
                     ->label('Telphone')
                     ->tel()
                     ->maxLength(255)
+                    ->visible(fn(Get $get) => $get('type') === 'karyawan')
                     ->default(null),
                 Forms\Components\Radio::make('status')
                     ->label('Status')
                     ->inline()
                     ->inlinelabel(false)
                     ->default('aktif')
+                    ->visible(fn(Get $get) => $get('type') === 'karyawan')
                     ->options([
                         'aktif' => 'Aktif',
                         'non-aktif' => 'Non-aktif'

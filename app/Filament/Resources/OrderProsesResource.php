@@ -64,6 +64,10 @@ class OrderProsesResource extends Resource
                                     ->label('SO')
                                     ->maxLength(255)
                                     ->default(null),
+                                    Forms\Components\TextInput::make('tally_proses')
+                                    ->label('Nama Tally')
+                                    ->maxLength(255)
+                                    ->default(null),
                                 ]),
 
                                 Fieldset::make('Informasi Barang')

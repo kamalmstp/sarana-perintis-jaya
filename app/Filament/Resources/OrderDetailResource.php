@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\BiayaTruckingForm;
+use Filament\Notifications\Notification;
 use App\Filament\Resources\OrderDetailResource\Pages;
 use App\Filament\Resources\OrderDetailResource\RelationManagers;
 use App\Models\OrderDetail;
@@ -13,6 +15,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -170,9 +176,29 @@ class OrderDetailResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Action::make('isi_biaya')
+                    ->label('Isi Biaya')
+                    ->tooltip('Isi Biaya')
+                    ->modalHeading('Isi Biaya Truck')
+                    ->form(fn ($record) => BiayaTruckingForm::make($record))
+                    ->fillForm(fn ($record) => BiayaTruckingForm::fill($record))
+                    ->action(function ($data, $record) {
+                        BiayaTruckingForm::save($data, $record);
+
+                        Notification::make()
+                            ->title('Biaya Berhasil disimpan')
+                            ->success()
+                            ->send();
+                    })
+                    ->icon('heroicon-m-currency-dollar')
+                    ->modalWidth('md')
+                    ->color('primary'),
+
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
 
             ])
             ->bulkActions([

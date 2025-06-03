@@ -9,6 +9,7 @@ use App\Models\Book;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -58,9 +59,12 @@ class BookResource extends Resource implements HasShieldPermissions
                 Forms\Components\TextInput::make('author')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->required()
-                    ->columnSpanFull(),
+                FileUpload::make('description')
+                    ->label('Upload Dokumen')
+                    ->directory('documents') // folder di storage/app/public/documents
+                    ->preserveFilenames()
+                    ->maxSize(2048) // maksimum 2MB
+                    ->required(),
             ]);
     }
 

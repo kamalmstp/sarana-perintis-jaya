@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 class OrderDetail extends Model
@@ -43,5 +44,15 @@ class OrderDetail extends Model
     public function order_proses(): BelongsTo
     {
         return $this->belongsTo(OrderProses::class);
+    }
+
+    public function driverCost(): HasOne
+    {
+        return $this->hasOne(DriverCosts::class);
+    }
+
+    public function rentalCost(): HasOne
+    {
+        return $this->hasOne(RentalCosts::class);
     }
 }

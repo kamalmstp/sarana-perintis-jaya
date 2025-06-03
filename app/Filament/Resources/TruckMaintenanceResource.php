@@ -56,19 +56,31 @@ class TruckMaintenanceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('truck_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('date')
+                    ->label('Tanggal')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nama Item')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('trucks.plate_number')
+                    ->label('No Polisi')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('qty')
+                    ->label('Jumlah')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->label('Harga')
+                    ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('jumlah')
+                    ->label('Total')
+                    ->getStateUsing(function($record) {
+                            $tot = $record->price * $record->qty;
+                            return "Rp ".number_format($tot, 0, ',', '.'); // Rumus perkalian
+                        })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

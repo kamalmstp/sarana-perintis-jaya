@@ -9,33 +9,40 @@ class BiayaTruckingForm
 {
     public static function make($record): array
     {
-        if ($record->trucks?->ownership === 'company') {
+        $ownership = $record?->trucks?->ownership ?? null;
+        if ($ownership === 'company') {
             return [
                 TextInput::make('uang_sangu')
                     ->numeric()
+                    ->prefix('Rp')
                     ->label('Uang Sangu'),
+
+                TextInput::make('uang_jalan')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->label('Uang Jalan'),
+
+                TextInput::make('uang_bbm')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->label('Uang BBM'),
 
                 TextInput::make('uang_kembali')
                     ->numeric()
+                    ->prefix('Rp')
                     ->label('Uang Kembali'),
 
                 TextInput::make('gaji_supir')
                     ->numeric()
+                    ->prefix('Rp')
                     ->label('Gaji Supir'),
-
-                TextInput::make('uang_bbm')
-                    ->numeric()
-                    ->label('Uang BBM'),
-
-                TextInput::make('uang_jalan')
-                    ->numeric()
-                    ->label('Uang Jalan'),
             ];
         }
 
         return [
             TextInput::make('tarif_rental')
                 ->numeric()
+                ->prefix('Rp')
                 ->label('Tarif Rental'),
         ];
     }

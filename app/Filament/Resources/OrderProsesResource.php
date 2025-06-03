@@ -190,6 +190,20 @@ class OrderProsesResource extends Resource
                     ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))
                     ->sortable()
                     ->alignEnd(),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Status')
+                    ->getStateUsing(fn ($record) => $record->status) // karena ini accessor, bukan field database
+                    ->formatStateUsing(fn (?string $state) => [
+                        'belum_dimulai' => 'Belum Dimulai',
+                        'dalam_proses' => 'Dalam Proses',
+                        'selesai' => 'Selesai',
+                    ][$state] ?? 'Tidak diketahui')
+                    ->color(fn (?string $state) => match ($state) {
+                        'belum_dimulai' => 'info',
+                        'dalam_proses' => 'danger',
+                        'selesai' => 'success',
+                        default => 'info',
+                    }),
                 Tables\Columns\TextColumn::make('invoice_status')
                     ->label('Status')
                     ->toggleable(isToggledHiddenByDefault: true),

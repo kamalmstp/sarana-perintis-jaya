@@ -43,4 +43,25 @@ class Order extends Model
     {
         return $this->belongsTo(Location::class, 'loading_location_id');
     }
+
+    public function getStatusAttribute(): string
+    {
+        $total = $this->order_proses()->count();
+
+        if ($total === 0) {
+            return 'draft';
+        }
+
+        $selesaiCount = $this->order_proses->filter(fn ($do) => $do->status === 'selesai')->count();
+
+        if ($selesaiCount === 0) {
+            return 'proses';
+        }
+
+        if ($selesaiCount < $total) {
+            return 'selesai_sebagian';
+        }
+
+        return 'selesai';
+    }
 }

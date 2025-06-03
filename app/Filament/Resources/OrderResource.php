@@ -111,6 +111,22 @@ class OrderResource extends Resource
                         return collect([$kg, $bag])->filter()->join('<br>');
                     })->html()
                     ->label('Quantity'),
+                Tables\Columns\BadgeColumn::make('status')
+                ->label('Status')
+                ->getStateUsing(fn ($record) => $record->status)
+                ->formatStateUsing(fn (?string $state) => [
+                    'draft' => 'Draft',
+                    'proses' => 'Proses',
+                    'selesai_sebagian' => 'Selesai Sebagian',
+                    'selesai' => 'Selesai',
+                ][$state] ?? 'Tidak diketahui')
+                ->color(fn (?string $state) => match ($state) {
+                    'draft' => 'info',
+                    'proses' => 'warning',
+                    'selesai_sebagian' => 'danger',
+                    'selesai' => 'success',
+                    default => 'info',
+                }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

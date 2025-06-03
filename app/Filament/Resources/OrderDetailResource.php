@@ -7,10 +7,14 @@ use Filament\Notifications\Notification;
 use App\Filament\Resources\OrderDetailResource\Pages;
 use App\Filament\Resources\OrderDetailResource\RelationManagers;
 use App\Models\OrderDetail;
+use App\Models\Truck;
 use Filament\Forms;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -35,6 +39,12 @@ class OrderDetailResource extends Resource
     public function getCombinedLabelAttribute(): string
     {
         return "DO: {$this->do_number} / PO: {$this->po_number} / SO: {$this->so_number}";
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['driverCost', 'rentalCost', 'trucks']);
     }
 
     public static function form(Form $form): Form
@@ -68,6 +78,11 @@ class OrderDetailResource extends Resource
                                     ->label('Truck')
                                     ->relationship('trucks','plate_number')
                                     ->preload()
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, Set $set){
+                                        $ownership = Truck::find($state)?->ownership;
+                                        $set('ownership', $ownership);
+                                    })
                                     ->searchable()
                                     ->createOptionForm(fn (Form $form) => TruckResource::form($form))
                                     ->default(null),
@@ -129,6 +144,50 @@ class OrderDetailResource extends Resource
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
+
+                Hidden::make('ownership')->reactive(),
+
+                Group::make()
+                    ->schema([
+                        Section::make('Biaya')
+                            ->schema([
+                                TextInput::make('uang_sangu')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->label('Uang Sangu'),
+
+                                TextInput::make('uang_jalan')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->label('Uang Jalan'),
+
+                                TextInput::make('uang_bbm')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->label('Uang BBM'),
+
+                                TextInput::make('uang_kembali')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->label('Uang Kembali'),
+
+                                TextInput::make('gaji_supir')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->label('Gaji Supir'),
+
+                                TextInput::make('tarif_rental')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->label('Tarif Rental'),
+                            ])
+                    ])
             ])
             ->columns(3);
     }

@@ -52,4 +52,25 @@ class OrderProses extends Model
     {
         return $this->hasMany(OrderDetail::class);
     }
+
+    public function getStatusAttribute(): string
+    {
+        $total = $this->order_detail()->count();
+
+        if ($total === 0) {
+            return 'belum_dimulai';
+        }
+
+        $selesaiCount = $this->order_detail()->where('status', 'selesai')->count();
+
+        if ($selesaiCount === 0) {
+            return 'belum_dimulai';
+        }
+
+        if ($selesaiCount < $total) {
+            return 'dalam_proses';
+        }
+
+        return 'selesai';
+    }
 }

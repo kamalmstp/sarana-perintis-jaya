@@ -176,10 +176,10 @@ class OrderDetailResource extends Resource
                         'selesai' => 'Selesai',
                     ][$state] ?? 'Tidak diketahui')
                     ->colors([
-                        'secondary' => 'pending',
+                        'primary' => 'pending',
                         'warning' => 'menunggu_biaya',
                         'success' => 'selesai',
-                        'primary' => 'proses',
+                        'danger' => 'proses',
                     ]),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

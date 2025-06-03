@@ -17,6 +17,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
@@ -162,7 +163,24 @@ class OrderDetailResource extends Resource
 
                         return collect([$bruto, $tara, $netto])->filter()->join('<br>');
                     })->html(),
-//                Tables\Columns\TextColumn::make('status_detail'),
+                Tables\Columns\TextColumn::make('total_biaya')
+                    ->label('Tagihan')
+                    ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))
+                    ->sortable(),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Status')
+                    ->formatStateUsing(fn (?string $state) => [
+                        'pending' => 'Pending',
+                        'proses' => 'Proses',
+                        'menunggu_biaya' => 'Menunggu Biaya',
+                        'selesai' => 'Selesai',
+                    ][$state] ?? 'Tidak diketahui')
+                    ->colors([
+                        'secondary' => 'pending',
+                        'warning' => 'menunggu_biaya',
+                        'success' => 'selesai',
+                        'primary' => 'proses',
+                    ]),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -186,6 +204,7 @@ class OrderDetailResource extends Resource
                     ->action(function ($data, $record) {
                         BiayaTruckingForm::save($data, $record);
 
+                        $record->updateStatusAutomatically();
                         Notification::make()
                             ->title('Biaya Berhasil disimpan')
                             ->success()
@@ -194,6 +213,27 @@ class OrderDetailResource extends Resource
                     ->icon('heroicon-m-currency-dollar')
                     ->modalWidth('md')
                     ->color('primary'),
+
+                    Action::make('selesaikan')
+                        ->label('Selesaikan')
+                        ->icon('heroicon-m-check-circle')
+                        ->color('success')
+                        ->visible(fn ($record) => !
+                            $record->is_selesai)
+                        ->requiresConfirmation()
+                        ->action(function ($record){
+                            $record->update([
+                                'is_selesai' => true,
+                                'selesai_at' => now(),
+                            ]);
+
+                            $record->updateStatusAutomatically();
+
+                            Notification::make()
+                                ->title('Order Berhasil diselesaikan')
+                                ->success()
+                                ->send();
+                        }),
 
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),

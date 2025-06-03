@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Storage;
 
 class OrderDetail extends Model
 {
-    //
+    const STATUS_PENDING = 'pending';
+    const STATUS_MENUNGGU_BIAYA = 'menunggu_biaya';
+    const STATUS_PROSES = 'proses';
+    const STATUS_SELESAI = 'selesai';
 
     // add fillable
     protected $fillable = [
@@ -24,7 +27,10 @@ class OrderDetail extends Model
       'tara',
       'netto',
       'status_detail',
-      'note_detail'
+      'note_detail',
+      'status',
+      'selesai_at',
+      'is_selesai'
     ];
     // add guaded
     protected $guarded = ['id'];
@@ -55,4 +61,50 @@ class OrderDetail extends Model
     {
         return $this->hasOne(RentalCosts::class);
     }
+
+    public function getTotalBiayaAttribute(): float
+    {
+        $tarif = $this->order_proses?->tarif ?? 0;
+        $netto = $this->bruto - $this->tara;
+        
+        return $tarif * $netto;
+    }
+
+    public static function getStatuses(): array
+    {
+        return [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_MENUNGGU_BIAYA => 'Menunggu Biaya',
+            self::STATUS_PROSES => 'Proses',
+            self::STATUS_SELESAI => 'Selesai',
+        ];
+    }
+
+    // Contoh method untuk update otomatis status berdasarkan kondisi biaya dan selesai_at
+    public function updateStatusAutomatically(): void
+    {
+        if ($this->selesai_at !== null && $this->hasCompleteCost()) {
+            $this->status = self::STATUS_SELESAI;
+        } elseif ($this->selesai_at === null ) {
+            $this->status = self::STATUS_PROSES;
+        } else{ 
+            $this->status = self::STATUS_MENUNGGU_BIAYA;
+        }
+
+        $this->save();
+    }
+
+    // Contoh cek biaya sudah lengkap, sesuaikan dengan field cost milikmu
+    public function hasCompleteCost(): bool
+    {
+        if ($this->trucks?->ownership === 'company') {
+            return $this->driverCost && $this->driverCost->uang_sangu !== null; // contoh cek
+        }
+        if ($this->trucks?->ownership === 'rental') {
+            return $this->rentalCost && $this->rentalCost->tarif_rental !== null;
+        }
+
+        return false;
+    }
+
 }

@@ -163,9 +163,9 @@ class InvoiceResource extends Resource
             ->columns([
                 BadgeColumn::make('status')
                     ->formatStateUsing(fn (?string $state) => [
-                        'draft' => 'Belum Dimulai',
-                        'sent' => 'Dalam Proses',
-                        'paid' => 'Selesai',
+                        'draft' => 'Draft',
+                        'sent' => 'Unpaid',
+                        'paid' => 'Paid',
                     ][$state] ?? 'Tidak diketahui')
                     ->color(fn (?string $state) => match ($state) {
                         'draft' => 'info',

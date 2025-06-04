@@ -7,31 +7,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-class InvoiceItem extends Model
+class JournalEntryLine extends Model
 {
     //
 
     // add fillable
     protected $fillable = [
-        'invoice_id',
-        'order_proses_id',
-        'description',
-        'quantity',
-        'tarif',
-        'amount',
+        'journal_entry_id',
+        'account_id',
+        'debit',
+        'credit',
     ];
     // add guaded
     protected $guarded = ['id'];
     // add hidden
     protected $hidden = ['created_at', 'updated_at'];
 
-    public function invoice()
+    public function journalEntry(): BelongsTo
     {
-        return $this->belongsTo(Invoice::class, 'invoice_id');
+        return $this->belongsTo(JournalEntry::class, 'journal_entry_id');
     }
 
-    public function order_proses()
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(OrderProses::class, 'order_proses_id');
+        return $this->belongsTo(Account::class, 'account_id');
     }
 }

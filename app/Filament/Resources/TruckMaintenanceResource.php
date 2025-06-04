@@ -19,7 +19,7 @@ class TruckMaintenanceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Order Management';
-    protected static ?string $navigationLabel = 'Truck Maintenance';
+    protected static ?string $navigationLabel = 'Truck Service';
     protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form

@@ -27,7 +27,7 @@ class OrderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Order (SPK)';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

@@ -19,6 +19,8 @@ class LocationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationLabel = 'Daftar Lokasi';
+    protected static ?int $navigationSort = 17;
     
     public static function getPermissionPrefixes(): array
     {

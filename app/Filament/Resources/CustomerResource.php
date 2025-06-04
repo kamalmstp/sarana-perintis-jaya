@@ -19,6 +19,8 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationLabel = 'Daftar Customer';
+    protected static ?int $navigationSort = 14;
     
     public static function getPermissionPrefixes(): array
     {

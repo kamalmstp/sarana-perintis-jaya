@@ -22,6 +22,8 @@ class TruckResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationLabel = 'Daftar Truck';
+    protected static ?int $navigationSort = 15;
     
     protected static ?string $recordTitleAttribute = 'truck';
     

@@ -166,9 +166,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationGroup(): ?string
     {
-        return Utils::isResourceNavigationGroupEnabled()
-            ? __('filament-shield::filament-shield.nav.group')
-            : 'Settings';
+        return 'Settings';
     }
 
     public static function getNavigationLabel(): string
@@ -183,7 +181,7 @@ class RoleResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationSort(): ?int
     {
-        return Utils::getResourceNavigationSort();
+        return 23;
     }
 
     public static function getSlug(): string

@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Account extends Model
 {
@@ -30,5 +33,10 @@ class Account extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Account::class, 'parent_id');
+    }
+
+    public function journalEntryLines(): HasMany
+    {
+        return $this->hasMany(JournalEntryLine::class);
     }
 }

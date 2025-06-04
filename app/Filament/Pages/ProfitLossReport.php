@@ -1,3 +1,5 @@
+<?php
+
 namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
@@ -6,9 +8,13 @@ use App\Models\Account;
 
 class ProfitLossReport extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
+
     protected static string $view = 'filament.pages.profit-loss-report';
+
     protected static ?string $title = 'Laporan Laba Rugi';
+    protected static ?string $navigationGroup = 'Report';
+    protected static ?int $navigationSort = 9;
 
     public ?string $startDate = null;
     public ?string $endDate = null;
@@ -48,14 +54,14 @@ class ProfitLossReport extends Page
     {
         return Account::where('type', $type)
             ->where('is_group', false)
-            ->with(['journalEntryItems.journalEntry' => fn ($query) =>
+            ->with(['journalEntryLines.journalEntry' => fn ($query) =>
                 $query->where('posted', true)
                       ->whereBetween('date', [$this->startDate, $this->endDate])
             ])
             ->get()
             ->map(function ($account) use ($type) {
-                $debit = $account->journalEntryItems->sum('debit');
-                $credit = $account->journalEntryItems->sum('credit');
+                $debit = $account->journalEntryLines->sum('debit');
+                $credit = $account->journalEntryLines->sum('credit');
 
                 $amount = $type === 'revenue'
                     ? $credit - $debit

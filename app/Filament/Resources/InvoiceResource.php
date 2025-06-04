@@ -13,6 +13,7 @@ use App\Filament\Forms\Components\DocumentFooterSection;
 use App\Filament\Forms\Components\DocumentHeaderSection;
 use App\Filament\Forms\Components\DocumentTotals;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\{DatePicker, Repeater, Select, TextInput};
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -28,6 +29,7 @@ class InvoiceResource extends Resource
     protected static ?string $navigationGroup = 'Finance';
     protected static ?string $navigationLabel = 'Invoices';
     protected static ?string $modelLabel = 'Invoice';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
@@ -159,33 +161,58 @@ class InvoiceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('invoice_number')->label('Invoice'),
-                TextColumn::make('order.spk_number')->label('SPK'),
-                TextColumn::make('customer_name')->label('Customer'),
-                TextColumn::make('invoice_date')->label('Tanggal')->date(),
-                TextColumn::make('total_amount')->label('Total')->money('IDR'),
                 BadgeColumn::make('status')
-                ->colors([
-                    'draft' => 'gray',
-                    'sent' => 'warning',
-                    'paid' => 'success',
-                ])
-                ->formatStateUsing(fn (string $state) => match ($state) {
-                    'draft' => 'Draft',
-                    'sent' => 'Terkirim',
-                    'paid' => 'Lunas',
-                    default => $state,
-                }),
+                    ->formatStateUsing(fn (?string $state) => [
+                        'draft' => 'Belum Dimulai',
+                        'sent' => 'Dalam Proses',
+                        'paid' => 'Selesai',
+                    ][$state] ?? 'Tidak diketahui')
+                    ->color(fn (?string $state) => match ($state) {
+                        'draft' => 'info',
+                        'sent' => 'danger',
+                        'paid' => 'success',
+                        default => 'info',
+                    }),
+                TextColumn::make('invoice_number')->label('Invoice'),
+                TextColumn::make('invoice_date')->label('Tanggal'),
+                TextColumn::make('customer_name')->label('Customer'),
+                TextColumn::make('order.spk_number')->label('SPK'),
+                TextColumn::make('total_amount')
+                    ->label('Total')
+                    ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.')),
             ])
             ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                //tambah tombol
-                Tables\Actions\Action::make('download_pdf')
-                    ->label('Cetak PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn ($record) => route('invoice.pdf', $record))
-                    ->openUrlInNewTab(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('download_pdf')
+                        ->label('Cetak PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('primary')
+                        ->url(fn ($record) => route('invoice.pdf', $record))
+                        ->openUrlInNewTab(),
+                    
+                    Tables\Actions\Action::make('markAsPaid')
+                        ->label('Pembayaran')
+                        ->color('success')
+                        ->icon('heroicon-o-banknotes')
+                        ->visible(fn ($record) => is_null($record->paid_at))
+                        ->requiresConfirmation()
+                        ->action(function ($record) {
+                            $record->update(['paid_at' => now(), 'status' => 'paid']);
+                            $record->createJournalOnPayment();
+
+                            Notification::make()
+                                ->title('Invoice ditandai sebagai dibayar.')
+                                ->success()
+                                ->send();
+                        }),
+
+                    Tables\Actions\ViewAction::make()
+                        ->color('info'),
+
+                    Tables\Actions\EditAction::make()
+                        ->color('warning'),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -203,6 +230,7 @@ class InvoiceResource extends Resource
             'index' => Pages\ListInvoices::route('/'),
             'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
+            'view' => Pages\ViewInvoice::route('/{record}'),
         ];
     }
 }

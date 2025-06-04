@@ -21,6 +21,8 @@ class DriverResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $navigationGroup = 'Master Data';
+    protected static ?string $navigationLabel = 'Daftar Driver';
+    protected static ?int $navigationSort = 16;
     
     public static function getPermissionPrefixes(): array
     {

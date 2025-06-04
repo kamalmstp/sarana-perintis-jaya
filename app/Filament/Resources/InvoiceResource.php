@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InvoiceResource\Pages;
+use Filament\Tables\Actions\Action;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -179,6 +180,12 @@ class InvoiceResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                
+                Tables\Actions\Action::make('download_pdf')
+                    ->label('Cetak PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn ($record) => route('invoice.pdf', $record))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

@@ -26,7 +26,8 @@ class Invoice extends Model
         'pais_amount',
         'status',
         'notes',
-        'created_by'
+        'created_by',
+        'pdf_path'
     ];
     // add guaded
     protected $guarded = ['id'];

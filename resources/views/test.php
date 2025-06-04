@@ -1,73 +1,20 @@
-namespace App\Filament\Pages;
+accounts
+'code',
+'name',
+'type',
+'parent_id',
+'is_group',
+'balance',
 
-use Filament\Pages\Page;
-use Illuminate\Support\Facades\DB;
-use App\Models\Account;
+journal_entries
+'date',
+'description',
+'reference_type',
+'reference_id',
+'posted',
 
-class ProfitLossReport extends Page
-{
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static string $view = 'filament.pages.profit-loss-report';
-    protected static ?string $title = 'Laporan Laba Rugi';
-
-    public ?string $startDate = null;
-    public ?string $endDate = null;
-
-    public array $revenues = [];
-    public array $expenses = [];
-    public float $totalRevenue = 0;
-    public float $totalExpense = 0;
-    public float $netProfit = 0;
-
-    public function mount(): void
-    {
-        $this->startDate = now()->startOfMonth()->toDateString();
-        $this->endDate = now()->endOfMonth()->toDateString();
-
-        $this->generateReport();
-    }
-
-    public function updated($property)
-    {
-        if (in_array($property, ['startDate', 'endDate'])) {
-            $this->generateReport();
-        }
-    }
-
-    public function generateReport()
-    {
-        $this->revenues = $this->getAccountsByType('revenue');
-        $this->expenses = $this->getAccountsByType('expense');
-
-        $this->totalRevenue = collect($this->revenues)->sum('amount');
-        $this->totalExpense = collect($this->expenses)->sum('amount');
-        $this->netProfit = $this->totalRevenue - $this->totalExpense;
-    }
-
-    protected function getAccountsByType(string $type): array
-    {
-        return Account::where('type', $type)
-            ->where('is_group', false)
-            ->with(['journalEntryItems.journalEntry' => fn ($query) =>
-                $query->where('posted', true)
-                      ->whereBetween('date', [$this->startDate, $this->endDate])
-            ])
-            ->get()
-            ->map(function ($account) use ($type) {
-                $debit = $account->journalEntryItems->sum('debit');
-                $credit = $account->journalEntryItems->sum('credit');
-
-                $amount = $type === 'revenue'
-                    ? $credit - $debit
-                    : $debit - $credit;
-
-                return [
-                    'code' => $account->code,
-                    'name' => $account->name,
-                    'amount' => $amount,
-                ];
-            })
-            ->filter(fn ($a) => $a['amount'] != 0)
-            ->toArray();
-    }
-}
+journal_enty_lines
+'journal_entry_id',
+'account_id',
+'debit',
+'credit',

@@ -180,7 +180,7 @@ class InvoiceResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                
+                //tambah tombol
                 Tables\Actions\Action::make('download_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')

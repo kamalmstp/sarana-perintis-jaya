@@ -6,6 +6,9 @@ use App\Filament\Resources\OrderProsesResource\Pages;
 use App\Filament\Resources\OrderProsesResource\RelationManagers;
 use App\Filament\Resources\OrderProsesResource\RelationManagers\OrderDetailRelationManager;
 use App\Models\OrderProses;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use Filament\Notifications\Notification;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
@@ -19,6 +22,7 @@ use Filament\Resources\Resource;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -226,9 +230,41 @@ class OrderProsesResource extends Resource
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                    Tables\Actions\BulkActionGroup::make([
+                        Tables\Actions\DeleteBulkAction::make(),
+                        BulkAction::make('createInvoice')
+                        ->label('Buat Invoice')
+                        ->action(function (Collection $records, array $data) {
+                            // Ambil customer dari salah satu record (asumsi sama semua)
+                            $customer = $records->first()->order->spk->customer ?? null;
+
+                            $invoice = Invoice::create([
+                                'customer_id' => $customer->id,
+                                'invoice_number' => 'INV-' . now()->format('Ymd-His'),
+                                'invoice_date' => now(),
+                                'status' => 'draft',
+                                'created_by' => auth()->id(),
+                            ]);
+
+                            foreach ($records as $record) {
+                                InvoiceItem::create([
+                                    'invoice_id' => $invoice->id,
+                                    'order_detail_id' => $record->id,
+                                    'description' => "Pengiriman {$record->order->do_number} ke {$record->destination}",
+                                    'amount' => $record->tarif, // pastikan kamu punya field ini
+                                ]);
+                            }
+
+                            Notification::make()
+                                ->title('Invoice berhasil dibuat')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->visible(fn () => auth()->user()->can('create', Invoice::class))
+                        ->icon('heroicon-o-document-text'),
+                    ]),
             ]);
     }
 

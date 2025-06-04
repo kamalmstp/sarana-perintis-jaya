@@ -115,25 +115,41 @@ class OrderDetailResource extends Resource
                                     Forms\Components\TextInput::make('bruto')
                                         ->label('Bruto')
                                         ->numeric()
+                                        ->live()
                                         ->reactive()
                                         ->default(null),
                                     
                                     Forms\Components\TextInput::make('tara')
                                         ->label('Tara')
                                         ->numeric()
+                                        ->live()
                                         ->reactive()
                                         ->default(null),
                                     
-                                    Forms\Components\TextInput::make('netto')
-                                        ->label('Netto')
-                                        ->numeric()
-                                        ->dehydrated()
-                                        ->default(fn (callable $get) => $get('bruto') - $get('tara'))
-                                        ->reactive()
-                                        ->disabled(),
-                                        // ->afterStateHydrated(function (callable $get, callable $set){
-                                        //     $set('netto', (float) $get('bruto') - (float) $get('tara'));
-                                        // }),
+                                    Forms\Components\Placeholder::make('netto')
+                                        //->label('Netto')
+                                        //->numeric()
+                                        //->live()
+                                        //->reactive()
+                                        ->content(
+                                            function(callable $get, callable $set){
+                                            $bruto = (float) $get('bruto');
+                                            $tara = (float) $get('tara');
+
+                                            return $bruto-$tara;
+                                        }
+                                        ),
+                                        // ->afterStateHydrated(function(callable $get, callable $set){
+                                        //     $bruto = (float) $get('bruto');
+                                        //     $tara = (float) $get('tara');
+                                        //     $set('netto', max($bruto - $tara, 0));
+                                        // })
+                                        // ->afterStateUpdated(function(callable $get, callable $set){
+                                        //     $bruto = (float) $get('bruto');
+                                        //     $tara = (float) $get('tara');
+                                        //     $set('netto', max($bruto - $tara, 0));
+                                        // })
+                                        // ->disabled(),
                                 ])
                                 ->columns(3),
 
@@ -207,7 +223,7 @@ class OrderDetailResource extends Resource
                 Tables\Columns\TextColumn::make('bag_send')
                     ->label('Qty')
                     ->formatStateUsing(function ($record){
-                        $send = $record->bag_send ? number_format($record->bag_send, 0, '.', '.'). 'Bag' : '- Bag' ;
+                        $send = $record->bag_send ? number_format($record->bag_send, 0, '.', '.'). ' Bag' : '- Bag' ;
                         $received = $record->bag_received ? number_format($record->bag_received, 0, '.', '.') . ' Bag' : '- Bag' ;
 
                         return collect([$send, $received])->filter()->join('<br>');
@@ -218,7 +234,7 @@ class OrderDetailResource extends Resource
                     ->formatStateUsing(function ($record){
                         $bruto = $record->bruto ? 'Bruto: '. number_format($record->bruto, 0, '.', '.') : '-' ;
                         $tara = $record->tara ? 'Tara: ' . number_format($record->tara, 0, '.', '.') : '-' ;
-                        $netto = 'Netto: ' .($record->bruto - $record->tara);
+                        $netto = $record->netto ? 'Netto: ' . number_format($record->netto, 0, '.', '.') : '-' ;;
 
                         return collect([$bruto, $tara, $netto])->filter()->join('<br>');
                     })->html(),

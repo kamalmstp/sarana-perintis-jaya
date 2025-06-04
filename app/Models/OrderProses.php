@@ -53,6 +53,11 @@ class OrderProses extends Model
         return $this->hasMany(OrderDetail::class);
     }
 
+    public function getTotalNettoAttribute()
+    {
+        return $this->order_detail()->sum('netto');
+    }
+
     public function getStatusAttribute(): string
     {
         $total = $this->order_detail()->count();

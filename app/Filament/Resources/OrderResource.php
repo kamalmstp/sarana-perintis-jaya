@@ -6,6 +6,8 @@ use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Filament\Resources\OrderResource\RelationManagers\OrderProsesRelationManager;
 use App\Models\Order;
+use Filament\Actions\Action;
+use Filament\Support\Enums\ActionSize;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -252,6 +254,19 @@ class OrderResource extends Resource
             'view' => Pages\ViewOrder::route('/{record}'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
             'order-proses' => Pages\ManageOrderProses::route('/{record}/order-proses'),
+        ];
+    }
+
+    public static function getActions(): array
+    {
+        return [
+            Action::make('buat_invoice')
+                ->label('Buat Invoice')
+                ->icon('heroicon-m-document-text')
+                ->color('primary')
+                ->size(ActionSize::Medium)
+                ->url(fn (Order $record) => InvoiceResource::getUrl('create', ['order_id' => $record->id]))
+                ->visible(fn (Order $record) => $record->order_proses()->exists()), // opsional: hanya jika ada proses
         ];
     }
 }

@@ -62,6 +62,17 @@ class OrderDetail extends Model
         return $this->hasOne(RentalCosts::class);
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function ($orderDetail) {
+            if (!is_null($orderDetail->bruto) && !is_null($orderDetail->tara)) {
+                $orderDetail->netto = $orderDetail->bruto - $orderDetail->tara;
+            } else {
+                $orderDetail->netto = null;
+            }
+        });
+    }
+
     public function getTotalBiayaAttribute(): float
     {
         $tarif = $this->order_proses?->tarif ?? 0;

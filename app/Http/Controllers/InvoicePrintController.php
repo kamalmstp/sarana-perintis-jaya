@@ -16,7 +16,7 @@ class InvoicePrintController extends Controller
             'invoice' => $invoice,
         ]);
 
-        $fileName = 'Invoice-' . $invoice->invoice_number . '.pdf';
+        $fileName = 'Invoice-' . str_replace(['/','\\'], '_',$invoice->invoice_number) . '.pdf';
         return $pdf->download($fileName);
     }
 }

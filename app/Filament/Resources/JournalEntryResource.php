@@ -46,25 +46,52 @@ class JournalEntryResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('date')->required(),
-                Forms\Components\TextInput::make('description')->required(),
-                Repeater::make('lines')
-                    ->relationship()
+                Forms\Components\Card::make()
                     ->schema([
-                        Forms\Components\Select::make('account_id')
-                            ->relationship('account', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->label('Account'),
-                        Forms\Components\TextInput::make('debit')
-                            ->numeric()->default(0)->label('Debit'),
-                        Forms\Components\TextInput::make('credit')
-                            ->numeric()->default(0)->label('Credit'),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\DatePicker::make('date')
+                                    ->label('Tanggal')
+                                    ->required(),
+
+                                Forms\Components\TextInput::make('description')
+                                    ->label('Deskripsi')
+                                    ->required(),
+                            ]),
                     ])
-                    ->columns(3)
-                    ->required()
-                    ->minItems(2),
+                    ->columns(1),
+
+                Forms\Components\Section::make('Detail Transaksi')
+                    ->description('Masukkan rincian akun dan nominalnya.')
+                    ->schema([
+                        Forms\Components\Repeater::make('lines')
+                            ->relationship()
+                            ->schema([
+                                Forms\Components\Select::make('account_id')
+                                    ->label('Akun')
+                                    ->relationship('account', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+
+                                Forms\Components\TextInput::make('debit')
+                                    ->label('Debit (Rp)')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->default(0),
+
+                                Forms\Components\TextInput::make('credit')
+                                    ->label('Kredit (Rp)')
+                                    ->numeric()
+                                    ->prefix('Rp')
+                                    ->default(0),
+                            ])
+                            ->columns(3)
+                            ->reorderable()
+                            ->addActionLabel('Tambah Baris')
+                            ->minItems(2)
+                            ->defaultItems(2),
+                    ]),
             ]);
     }
 
@@ -72,18 +99,29 @@ class JournalEntryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('date')->date(),
-                Tables\Columns\TextColumn::make('description')->wrap(),
-                Tables\Columns\TextColumn::make('lines_count')->counts('lines')->label('Jumlah Baris'),
+                Tables\Columns\TextColumn::make('date')
+                    ->label('Tanggal')
+                    ->date()
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Deskripsi')
+                    ->wrap()
+                    ->limit(40)
+                    ->tooltip(fn ($record) => $record->description),
+
+                Tables\Columns\TextColumn::make('lines_count')
+                    ->label('Jumlah Baris')
+                    ->counts('lines')
+                    ->badge()
+                    ->color('primary'),
             ])
             ->defaultSort('date', 'desc')
-            ->filters([
-                //
-            ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-   Tables\Actions\DeleteAction::make(),
-
+                Tables\Actions\ViewAction::make()->label('Lihat'),
+                Tables\Actions\EditAction::make()->label('Edit'),
+                Tables\Actions\DeleteAction::make()->label('Hapus'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

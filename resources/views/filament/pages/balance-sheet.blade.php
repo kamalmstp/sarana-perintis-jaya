@@ -1,44 +1,101 @@
 <x-filament::page>
-    <form wire:submit.prevent="loadData">
-        {{ $this->form }}
-        <div class="mt-4">
-            <x-filament::button type="submit">Tampilkan</x-filament::button>
-        </div>
-    </form>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-        <div>
-            <h2 class="text-xl font-bold mb-2">Aktiva</h2>
-            <x-filament::card>
-                @foreach ($assets as $item)
-                    <div class="flex justify-between py-1 border-b">
-                        <span>{{ $item->name }}</span>
-                        <span class="text-right">{{ number_format($item->balance, 0, ',', '.') }}</span>
-                    </div>
-                @endforeach
-            </x-filament::card>
+    <div class="space-y-4">
+        <div class="flex items-center gap-4">
+            {{ $this->form }}
         </div>
 
-        <div>
-            <h2 class="text-xl font-bold mb-2">Kewajiban</h2>
-            <x-filament::card>
-                @foreach ($liabilities as $item)
-                    <div class="flex justify-between py-1 border-b">
-                        <span>{{ $item->name }}</span>
-                        <span class="text-right">{{ number_format($item->balance, 0, ',', '.') }}</span>
-                    </div>
-                @endforeach
-            </x-filament::card>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {{-- Assets --}}
+            <div>
+                <x-filament::card>
+                    <x-slot name="header">
+                        <h2 class="text-lg font-bold">Aset</h2>
+                    </x-slot>
+                    <table class="w-full text-sm">
+                        @foreach ($assets as $asset)
+                            <tr class="border-t">
+                                <td class="py-1 text-gray-700">{{ $asset->code }} - {{ $asset->name }}</td>
+                                <td class="py-1 text-right text-gray-800 font-medium">
+                                    Rp {{ number_format($asset->balance, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr class="border-t font-bold">
+                            <td class="py-2">Total Aset</td>
+                            <td class="py-2 text-right">
+                                Rp {{ number_format(collect($assets)->sum('balance'), 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </x-filament::card>
+            </div>
 
-            <h2 class="text-xl font-bold mt-4 mb-2">Ekuitas</h2>
-            <x-filament::card>
-                @foreach ($equity as $item)
-                    <div class="flex justify-between py-1 border-b">
-                        <span>{{ $item->name }}</span>
-                        <span class="text-right">{{ number_format($item->balance, 0, ',', '.') }}</span>
-                    </div>
-                @endforeach
-            </x-filament::card>
+            {{-- Liabilities --}}
+            <div>
+                <x-filament::card>
+                    <x-slot name="header">
+                        <h2 class="text-lg font-bold">Liabilitas</h2>
+                    </x-slot>
+                    <table class="w-full text-sm">
+                        @foreach ($liabilities as $liability)
+                            <tr class="border-t">
+                                <td class="py-1 text-gray-700">{{ $liability->code }} - {{ $liability->name }}</td>
+                                <td class="py-1 text-right text-gray-800 font-medium">
+                                    Rp {{ number_format($liability->balance, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr class="border-t font-bold">
+                            <td class="py-2">Total Liabilitas</td>
+                            <td class="py-2 text-right">
+                                Rp {{ number_format(collect($liabilities)->sum('balance'), 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </x-filament::card>
+            </div>
+
+            {{-- Equity --}}
+            <div>
+                <x-filament::card>
+                    <x-slot name="header">
+                        <h2 class="text-lg font-bold">Ekuitas</h2>
+                    </x-slot>
+                    <table class="w-full text-sm">
+                        @foreach ($equity as $eq)
+                            <tr class="border-t">
+                                <td class="py-1 text-gray-700">{{ $eq->code }} - {{ $eq->name }}</td>
+                                <td class="py-1 text-right text-gray-800 font-medium">
+                                    Rp {{ number_format($eq->balance, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tr class="border-t font-bold">
+                            <td class="py-2">Total Ekuitas</td>
+                            <td class="py-2 text-right">
+                                Rp {{ number_format(collect($equity)->sum('balance'), 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </x-filament::card>
+            </div>
         </div>
+
+        {{-- Total Liabilitas + Ekuitas --}}
+        <x-filament::card class="mt-4">
+            <table class="w-full text-sm font-semibold">
+                <tr class="border-t text-gray-700">
+                    <td class="py-2">Total Liabilitas + Ekuitas</td>
+                    <td class="py-2 text-right">
+                        Rp {{
+                            number_format(
+                                collect($liabilities)->sum('balance') + collect($equity)->sum('balance'),
+                                0, ',', '.'
+                            )
+                        }}
+                    </td>
+                </tr>
+            </table>
+        </x-filament::card>
     </div>
 </x-filament::page>

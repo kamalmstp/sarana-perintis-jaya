@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Collection;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -46,7 +45,14 @@ class BalanceSheet extends Page
     public function mount(): void
     {
         $this->endDate = now()->toDateString();
-        $this->loadData();
+        $this->generateReport();
+    }
+
+    public function updated($property): void
+    {
+        if ($property === 'endDate') {
+            $this->generateReport();
+        }
     }
 
     public function getFormSchema(): array
@@ -59,6 +65,15 @@ class BalanceSheet extends Page
         ];
     }
 
+    public function generateReport(): void
+    {
+        $data = $this->loadData();
+
+        $this->assets = $data['assets'];
+        $this->liabilities = $data['liabilities'];
+        $this->equity = $data['equity'];
+    }
+
     public function loadData(): array
     {
         $endDate = $this->endDate;
@@ -68,6 +83,7 @@ class BalanceSheet extends Page
             ->join('accounts as a', 'a.id', '=', 'l.account_id')
             ->select(
                 'a.id',
+                'a.code',
                 'a.name',
                 'a.type',
                 DB::raw('SUM(l.debit) as total_debit'),
@@ -76,21 +92,25 @@ class BalanceSheet extends Page
             ->where('j.posted', true)
             ->whereDate('j.date', '<=', $endDate)
             ->whereIn('a.type', ['asset', 'liability', 'equity'])
-            ->groupBy('a.id', 'a.name', 'a.type')
+            ->groupBy('a.id', 'a.code', 'a.name', 'a.type')
             ->orderBy('a.code')
             ->get()
             ->map(function ($row) {
-                $row->balance = $row->total_debit - $row->total_credit;
+                $row->opening_balance = DB::table('accounts')->where('id', $row->id)->value('balance') ?? 0;
+                $calculated = $row->total_debit - $row->total_credit;
+                $row->balance = $row->opening_balance + $calculated;
+
                 if (in_array($row->type, ['liability', 'equity'])) {
                     $row->balance = -$row->balance;
                 }
+
                 return $row;
             });
 
         return [
-            'assets' => $balances->where('type', 'asset'),
-            'liabilities' => $balances->where('type', 'liability'),
-            'equity' => $balances->where('type', 'equity'),
+            'assets' => $balances->where('type', 'asset')->values(),
+            'liabilities' => $balances->where('type', 'liability')->values(),
+            'equity' => $balances->where('type', 'equity')->values(),
         ];
     }
 }

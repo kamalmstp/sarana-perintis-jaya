@@ -19,6 +19,7 @@ class Account extends Model
         'parent_id',
         'is_group',
         'balance',
+        'opening_balance',
     ];
     // add guaded
     protected $guarded = ['id'];

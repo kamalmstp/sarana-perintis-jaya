@@ -29,22 +29,47 @@ class AccountResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('code')->required()->maxLength(10),
-                Forms\Components\TextInput::make('name')->required()->maxLength(100),
-                Forms\Components\Select::make('type')
-                    ->options([
-                        'asset' => 'Asset',
-                        'liability' => 'Liability',
-                        'equity' => 'Equity',
-                        'revenue' => 'Revenue',
-                        'expense' => 'Expense',
-                    ])
-                    ->required(),
-                Forms\Components\Select::make('parent_id')
-                    ->relationship('parent', 'name')
-                    ->searchable()
-                    ->label('Parent Account')
-                    ->nullable(),
+                Forms\Components\Card::make([
+                    Forms\Components\TextInput::make('code')
+                        ->label('Kode Akun')
+                        ->required()
+                        ->maxLength(20),
+
+                    Forms\Components\TextInput::make('name')
+                        ->label('Nama Akun')
+                        ->required()
+                        ->maxLength(100),
+
+                    Forms\Components\Select::make('type')
+                        ->label('Tipe Akun')
+                        ->options([
+                            'asset' => 'Aktiva',
+                            'liability' => 'Pasiva',
+                            'equity' => 'Ekuitas',
+                            'revenue' => 'Pendapatan',
+                            'expense' => 'Biaya',
+                        ])
+                        ->required()
+                        ->native(false),
+
+                    Forms\Components\Select::make('parent_id')
+                        ->label('Akun Induk')
+                        ->relationship('parent', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->nullable(),
+
+                    Forms\Components\Toggle::make('is_group')
+                        ->label('Merupakan Akun Grup?')
+                        ->inline(),
+
+                    Forms\Components\TextInput::make('opening_balance')
+                        ->label('Saldo Awal')
+                        ->numeric()
+                        ->prefix('Rp')
+                        ->default(0)
+                        ->visible(fn ($get) => !$get('is_group')),
+                ])->columns(2),
             ]);
     }
 

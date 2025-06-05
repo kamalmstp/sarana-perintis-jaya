@@ -22,6 +22,24 @@ class TruckMaintenanceResource extends Resource
     protected static ?string $navigationLabel = 'Truck Service';
     protected static ?int $navigationSort = 5;
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
+    
     public static function form(Form $form): Form
     {
         return $form

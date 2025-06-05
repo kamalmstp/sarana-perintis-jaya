@@ -36,6 +36,24 @@ class OrderDetailResource extends Resource
     protected static ?string $navigationLabel = 'Order (Trucking)';
     protected static ?int $navigationSort = 4;
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
+    
     public function getCombinedLabelAttribute(): string
     {
         return "DO: {$this->do_number} / PO: {$this->po_number} / SO: {$this->so_number}";

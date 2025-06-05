@@ -23,6 +23,24 @@ class JournalEntryResource extends Resource
     protected static ?string $navigationLabel = 'Jurnal Umum';
     protected static ?int $navigationSort = 7;
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
+    
     public static function form(Form $form): Form
     {
         return $form

@@ -26,24 +26,6 @@ class GeneralLedger extends Page
 
     public $entries = [];
 
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view',
-            'view_any',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'replicate',
-            'reorder',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
-    }
-
     public function mount(): void
     {
         $this->start_date = now()->startOfMonth()->toDateString();

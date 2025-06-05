@@ -10,7 +10,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 class ProfitLossReport extends Page
 {
     use HasPageShield;
-    
+
     protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
 
     protected static string $view = 'filament.pages.profit-loss-report';
@@ -28,10 +28,6 @@ class ProfitLossReport extends Page
     public float $totalExpense = 0;
     public float $netProfit = 0;
 
-    protected static function shouldAuthorize(): bool
-    {
-        return true;
-    }
 
     public function mount(): void
     {

@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AccountResource\Pages;
 use App\Filament\Resources\AccountResource\RelationManagers;
 use App\Models\Account;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+//use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -23,24 +23,6 @@ class AccountResource extends Resource
     protected static ?string $navigationLabel = 'Daftar Akun';
     protected static ?int $navigationSort = 8;
 
-    
-    public static function getPermissionPrefixes(): array
-    {
-        return [
-            'view',
-            'view_any',
-            'create',
-            'update',
-            'restore',
-            'restore_any',
-            'replicate',
-            'reorder',
-            'delete',
-            'delete_any',
-            'force_delete',
-            'force_delete_any',
-        ];
-    }
 
 
     public static function form(Form $form): Form

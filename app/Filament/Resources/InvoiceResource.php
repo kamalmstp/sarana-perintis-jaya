@@ -12,7 +12,7 @@ use App\Filament\Forms\Components\CustomTableRepeater;
 use App\Filament\Forms\Components\DocumentFooterSection;
 use App\Filament\Forms\Components\DocumentHeaderSection;
 use App\Filament\Forms\Components\DocumentTotals;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+//use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\{DatePicker, Repeater, Select, TextInput};

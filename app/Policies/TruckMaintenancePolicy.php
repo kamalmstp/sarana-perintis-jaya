@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\JournalEntry;
+use App\Models\TruckMaintenance;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class JournalEntryPolicy
+class TruckMaintenancePolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class JournalEntryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_journal::entry');
+        return $user->can('view_any_truck::maintenance');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, JournalEntry $journalEntry): bool
+    public function view(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('view_journal::entry');
+        return $user->can('view_truck::maintenance');
     }
 
     /**
@@ -31,23 +31,23 @@ class JournalEntryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_journal::entry');
+        return $user->can('create_truck::maintenance');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, JournalEntry $journalEntry): bool
+    public function update(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('update_journal::entry');
+        return $user->can('update_truck::maintenance');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, JournalEntry $journalEntry): bool
+    public function delete(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('delete_journal::entry');
+        return $user->can('delete_truck::maintenance');
     }
 
     /**
@@ -55,15 +55,15 @@ class JournalEntryPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_journal::entry');
+        return $user->can('delete_any_truck::maintenance');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, JournalEntry $journalEntry): bool
+    public function forceDelete(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('force_delete_journal::entry');
+        return $user->can('force_delete_truck::maintenance');
     }
 
     /**
@@ -71,15 +71,15 @@ class JournalEntryPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_journal::entry');
+        return $user->can('force_delete_any_truck::maintenance');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, JournalEntry $journalEntry): bool
+    public function restore(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('restore_journal::entry');
+        return $user->can('restore_truck::maintenance');
     }
 
     /**
@@ -87,15 +87,15 @@ class JournalEntryPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_journal::entry');
+        return $user->can('restore_any_truck::maintenance');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, JournalEntry $journalEntry): bool
+    public function replicate(User $user, TruckMaintenance $truckMaintenance): bool
     {
-        return $user->can('replicate_journal::entry');
+        return $user->can('replicate_truck::maintenance');
     }
 
     /**
@@ -103,6 +103,6 @@ class JournalEntryPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_journal::entry');
+        return $user->can('reorder_truck::maintenance');
     }
 }

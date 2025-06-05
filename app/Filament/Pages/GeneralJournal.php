@@ -6,6 +6,7 @@ use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class GeneralJournal extends Page
 {
@@ -21,6 +22,24 @@ class GeneralJournal extends Page
     public ?string $endDate = null;
 
     public array $journals = [];
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
 
     public function mount(): void
     {

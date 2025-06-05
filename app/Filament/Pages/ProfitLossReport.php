@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 use App\Models\Account;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class ProfitLossReport extends Page
 {
@@ -24,6 +25,24 @@ class ProfitLossReport extends Page
     public float $totalRevenue = 0;
     public float $totalExpense = 0;
     public float $netProfit = 0;
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
 
     public function mount(): void
     {

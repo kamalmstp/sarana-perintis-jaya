@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Account;
 use Filament\Forms\Components\{Select, DatePicker};
 use Filament\Forms\Concerns\InteractsWithForms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class GeneralLedger extends Page
 {
@@ -24,6 +25,24 @@ class GeneralLedger extends Page
     public ?string $end_date = null;
 
     public $entries = [];
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
 
     public function mount(): void
     {

@@ -26,6 +26,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
 class OrderDetailResource extends Resource
 {
@@ -53,7 +54,7 @@ class OrderDetailResource extends Resource
             'force_delete_any',
         ];
     }
-    
+
     public function getCombinedLabelAttribute(): string
     {
         return "DO: {$this->do_number} / PO: {$this->po_number} / SO: {$this->so_number}";

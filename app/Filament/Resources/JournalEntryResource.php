@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Repeater;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
 class JournalEntryResource extends Resource
 {
@@ -40,7 +41,7 @@ class JournalEntryResource extends Resource
             'force_delete_any',
         ];
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form

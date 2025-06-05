@@ -12,7 +12,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class GeneralLedger extends Page
 {
-    use InteractsWithForms;
+    use InteractsWithForms, HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?string $title = 'Buku Besar';

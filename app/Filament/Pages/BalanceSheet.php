@@ -11,7 +11,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class BalanceSheet extends Page
 {
-    use InteractsWithForms;
+    use InteractsWithForms, HasPageShield;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
     protected static string $view = 'filament.pages.balance-sheet';

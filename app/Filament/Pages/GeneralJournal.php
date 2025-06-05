@@ -10,7 +10,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class GeneralJournal extends Page
 {
-    use InteractsWithForms;
+    use InteractsWithForms, HasPageShield;
 
     protected static ?string $title = 'Jurnal Umum';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';

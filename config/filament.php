@@ -85,5 +85,6 @@ return [
     */
 
     'livewire_loading_delay' => 'default',
+    'dashboard' => \App\Filament\Pages\Dashboard::class,
 
 ];

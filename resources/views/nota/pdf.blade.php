@@ -62,7 +62,7 @@
 
         /* SIGNATURE SECTION */
         .signature-section {
-            margin-top: 50px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
             text-align: center;
@@ -119,47 +119,53 @@
         <tr>
             <td><strong>No. Surat Jalan</strong></td>
             <td>: {{ $orderDetail->rentalCost->no_surat_jalan ?? '-' }}</td>
+            <td><strong>Nomor Polisi</strong></td>
+            <td>: {{ $orderDetail->trucks->plate_number ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td><strong>Nama/NPWP</strong></td>
+            <td>: {{ $orderDetail->rentalCost->rental->name ?? '-' }} / {{ $orderDetail->rentalCost->rental->npwp ?? '-' }}</td>
             <td><strong>Supir</strong></td>
             <td>: {{ $orderDetail->drivers->name ?? '-' }}</td>
         </tr>
-        <tr>
-            <td><strong>Plat Nomor</strong></td>
-            <td>: {{ $orderDetail->trucks->plate_number ?? '-' }}</td>
-            <td></td>
-            <td></td>
-        </tr>
     </table>
 
-    <table class="payment-table" style="margin-top: 25px;">
+    <table class="payment-table" style="margin-top: 10px;">
         <thead>
             <tr>
-                <th>Deskripsi</th>
+                <th>Nama Barang</th>
+                <th>Tujuan</th>
+                <th>Qty</th>
+                <th>Harga</th>
                 <th>Jumlah (Rp)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Pengiriman {{$orderDetail->order_proses->item_proses}} sebanyak {{$orderDetail->netto . ' Kg' ?? '-' }}, ke {{$orderDetail->order_proses->locations->name}}</td>
+                <td>{{$orderDetail->order_proses->item_proses ?? '-'}}</td>
+                <td>{{$orderDetail->order_proses->locations->name ?? '-'}}</td>
+                <td>{{$orderDetail->netto . ' Kg' ?? '-' }}</td>
                 <td>Rp {{ number_format($orderDetail->rentalCost->tarif_rental, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($orderDetail->rentalCost->tarif_rental * $orderDetail->netto, 0, ',', '.') }}</td>
             </tr>
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td>PPh Pasal 23 /PP 23 Tahun 2018</td>
-                <td>(Rp {{ number_format(($orderDetail->rentalCost->tarif_rental * $orderDetail->rentalCost->pph), 0, ',', '.') }})</td>
+                <td colspan="4">PPh Pasal 23 /PP 23 Tahun 2018</td>
+                <td>(Rp {{ number_format((($orderDetail->rentalCost->tarif_rental * $orderDetail->netto) * $orderDetail->rentalCost->pph), 0, ',', '.') }})</td>
             </tr>
             <tr class="total-row">
-                <td>Biaya Administrasi</td>
+                <td colspan="4">Biaya Administrasi</td>
                 <td>(Rp {{ number_format(5000, 0, ',', '.') }})</td>
             </tr>
             <tr class="total-row" style="font-weight: bold;">
-                <td>Total Dibayarkan</td>
-                <td>Rp {{ number_format(($orderDetail->rentalCost->tarif_rental - 5000 - ($orderDetail->rentalCost->tarif_rental * $orderDetail->rentalCost->pph)), 0, ',', '.') }}</td>
+                <td colspan="4">Total Dibayarkan</td>
+                <td>Rp {{ number_format((($orderDetail->rentalCost->tarif_rental * $orderDetail->netto) - 5000 - (($orderDetail->rentalCost->tarif_rental * $orderDetail->netto) * $orderDetail->rentalCost->pph)), 0, ',', '.') }}</td>
             </tr>
         </tfoot>
     </table>
 
-    <table style="width: 100%; margin-top: 30px;">
+    <table style="width: 100%; margin-top: 10px;">
         <tr>
             <td style="width: 50%; text-align: center;">
                 <p>Diterima oleh,<br>Penerima</p>

@@ -15,6 +15,7 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -211,6 +212,14 @@ class OrderDetailResource extends Resource
                                 TextInput::make('no_surat_jalan')
                                     ->visible(fn(Get $get) => $get('ownership') === 'rental')
                                     ->label('No Surat Jalan'),
+                                
+                                Radio::make('pph')
+                                    ->label('Pajak')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->options([
+                                        '0.2' => 'NPWP',
+                                        '0.05' => 'SKB'
+                                    ]),
                                 
                                 TextInput::make('tarif_rental')
                                     ->numeric()

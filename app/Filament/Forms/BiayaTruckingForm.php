@@ -4,6 +4,7 @@ namespace App\Filament\Forms;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Radio;
 
 class BiayaTruckingForm
 {
@@ -46,6 +47,13 @@ class BiayaTruckingForm
             TextInput::make('no_surat_jalan')
                 ->label('No Surat Jalan'),
 
+            Radio::make('pph')
+                ->label('Pajak')
+                ->options([
+                    '0.02' => 'NPWP',
+                    '0.005' => 'SKB'
+                ]),
+
             TextInput::make('tarif_rental')
                 ->numeric()
                 ->prefix('Rp')
@@ -66,7 +74,7 @@ class BiayaTruckingForm
         return $record->rentalCost 
             ?
         $record->rentalCost->only([
-            'tarif_rental', 'no_kwitansi', 'no_surat_jalan'
+            'tarif_rental', 'no_kwitansi', 'no_surat_jalan', 'pph'
         ]) : [];
     }
 

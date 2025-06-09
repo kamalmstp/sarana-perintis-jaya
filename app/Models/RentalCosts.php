@@ -18,6 +18,7 @@ class RentalCosts extends Model
         'no_kwitansi',
         'no_surat_jalan',
         'status',
+        'pph',
         'note'
     ];
     // add guaded

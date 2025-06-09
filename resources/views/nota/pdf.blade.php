@@ -57,7 +57,6 @@
             text-align: left;
         }
         .total-row {
-            font-weight: bold;
             background-color: #f5f5f5;
         }
 
@@ -113,19 +112,19 @@
     <table class="info-table">
         <tr>
             <td><strong>No. Kwitansi</strong></td>
-            <td>: {{ 'KW-' . str_pad($orderDetail->no_kwitansi, 5, '0', STR_PAD_LEFT) }}</td>
+            <td>: {{ 'KW-' . str_pad($orderDetail->rentalCost->no_kwitansi, 5, '0', STR_PAD_LEFT) }}</td>
             <td><strong>Tanggal</strong></td>
             <td>: {{ $orderDetail->created_at->format('d M Y') }}</td>
         </tr>
         <tr>
             <td><strong>No. Surat Jalan</strong></td>
-            <td>: {{ $orderDetail->no_surat_jalan ?? '-' }}</td>
+            <td>: {{ $orderDetail->rentalCost->no_surat_jalan ?? '-' }}</td>
             <td><strong>Supir</strong></td>
             <td>: {{ $orderDetail->drivers->name ?? '-' }}</td>
         </tr>
         <tr>
             <td><strong>Plat Nomor</strong></td>
-            <td>: {{ $orderDetail->plate_number ?? '-' }}</td>
+            <td>: {{ $orderDetail->trucks->plate_number ?? '-' }}</td>
             <td></td>
             <td></td>
         </tr>
@@ -140,14 +139,22 @@
         </thead>
         <tbody>
             <tr>
-                <td>Pengiriman {{$orderDetail->order_proses->item_proses}} sebanyak {{$orderDetail->bag_send . ' Bag' ?? '-' }}, ke {{$orderDetail->order_proses->locations->name}}</td>
+                <td>Pengiriman {{$orderDetail->order_proses->item_proses}} sebanyak {{$orderDetail->netto . ' Kg' ?? '-' }}, ke {{$orderDetail->order_proses->locations->name}}</td>
                 <td>Rp {{ number_format($orderDetail->rentalCost->tarif_rental, 0, ',', '.') }}</td>
             </tr>
         </tbody>
         <tfoot>
             <tr class="total-row">
+                <td>PPh Pasal 23 /PP 23 Tahun 2018</td>
+                <td>(Rp {{ number_format(($orderDetail->rentalCost->tarif_rental * $orderDetail->rentalCost->pph), 0, ',', '.') }})</td>
+            </tr>
+            <tr class="total-row">
+                <td>Biaya Administrasi</td>
+                <td>(Rp {{ number_format(5000, 0, ',', '.') }})</td>
+            </tr>
+            <tr class="total-row" style="font-weight: bold;">
                 <td>Total Dibayarkan</td>
-                <td>Rp {{ number_format($orderDetail->rentalCost->tarif_rental, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format(($orderDetail->rentalCost->tarif_rental - 5000 - ($orderDetail->rentalCost->tarif_rental * $orderDetail->rentalCost->pph)), 0, ',', '.') }}</td>
             </tr>
         </tfoot>
     </table>

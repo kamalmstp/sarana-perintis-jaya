@@ -19,12 +19,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Order (SPK)';
     protected static ?int $navigationSort = 2;
@@ -164,6 +165,11 @@ class OrderResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
   
+            ])
+            ->headerActions([
+                ExportAction::make()
+                    ->label('Export Excel'),
+//                    ->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

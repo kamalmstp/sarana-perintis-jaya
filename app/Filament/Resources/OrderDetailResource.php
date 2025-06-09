@@ -27,6 +27,7 @@ use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class OrderDetailResource extends Resource
 {
@@ -146,10 +147,6 @@ class OrderDetailResource extends Resource
                                         ->default(null),
                                     
                                     Forms\Components\Placeholder::make('netto')
-                                        //->label('Netto')
-                                        //->numeric()
-                                        //->live()
-                                        //->reactive()
                                         ->content(
                                             function(callable $get, callable $set){
                                             $bruto = (float) $get('bruto');
@@ -158,17 +155,7 @@ class OrderDetailResource extends Resource
                                             return $bruto-$tara;
                                         }
                                         ),
-                                        // ->afterStateHydrated(function(callable $get, callable $set){
-                                        //     $bruto = (float) $get('bruto');
-                                        //     $tara = (float) $get('tara');
-                                        //     $set('netto', max($bruto - $tara, 0));
-                                        // })
-                                        // ->afterStateUpdated(function(callable $get, callable $set){
-                                        //     $bruto = (float) $get('bruto');
-                                        //     $tara = (float) $get('tara');
-                                        //     $set('netto', max($bruto - $tara, 0));
-                                        // })
-                                        // ->disabled(),
+
                                 ])
                                 ->columns(3),
 
@@ -216,6 +203,15 @@ class OrderDetailResource extends Resource
                                     ->visible(fn(Get $get) => $get('ownership') === 'company')
                                     ->label('Gaji Supir'),
 
+                                
+                                TextInput::make('no_kwitansi')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->label('No Kwitansi'),
+                                
+                                TextInput::make('no_surat_jalan')
+                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->label('No Surat Jalan'),
+                                
                                 TextInput::make('tarif_rental')
                                     ->numeric()
                                     ->prefix('Rp')
@@ -290,8 +286,8 @@ class OrderDetailResource extends Resource
             ->actions([
                 ActionGroup::make([
                     Action::make('isi_biaya')
-                    ->label('Isi Biaya')
-                    ->tooltip('Isi Biaya')
+                    ->label('Biaya')
+                    ->tooltip('Biaya Truck')
                     ->modalHeading('Isi Biaya Truck')
                     ->form(fn ($record) => BiayaTruckingForm::make($record))
                     ->fillForm(fn ($record) => BiayaTruckingForm::fill($record))
@@ -307,6 +303,15 @@ class OrderDetailResource extends Resource
                     ->icon('heroicon-m-currency-dollar')
                     ->modalWidth('md')
                     ->color('primary'),
+
+                    Action::make('cetak_nota')
+                        ->label('Cetak Nota')
+                        ->color('warning')
+                        ->icon('heroicon-o-printer')
+                        ->visible(fn ($record) =>
+                            $record->trucks->ownership === "rental")
+                        ->url(fn ($record) => route('nota.cetak', $record))
+                        ->openUrlInNewTab(),
 
                     Action::make('selesaikan')
                         ->label('Selesaikan')
@@ -335,6 +340,11 @@ class OrderDetailResource extends Resource
                 ]),
 
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->label('Export Excel'),
+//                    ->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
@@ -354,6 +364,7 @@ class OrderDetailResource extends Resource
         return [
             'index' => Pages\ListOrderDetails::route('/'),
             'create' => Pages\CreateOrderDetail::route('/create'),
+            'view' => Pages\ViewOrderDetails::route('/{record}'),
             'edit' => Pages\EditOrderDetail::route('/{record}/edit'),
         ];
     }

@@ -15,6 +15,8 @@ class RentalCosts extends Model
     protected $fillable = [
         'order_detail_id',
         'tarif_rental',
+        'no_kwitansi',
+        'no_surat_jalan',
         'status',
         'note'
     ];

@@ -1,20 +1,19 @@
-accounts
-'code',
-'name',
-'type',
-'parent_id',
-'is_group',
-'balance',
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
-journal_entries
-'date',
-'description',
-'reference_type',
-'reference_id',
-'posted',
-
-journal_enty_lines
-'journal_entry_id',
-'account_id',
-'debit',
-'credit',
+public static function table(Table $table): Table
+{
+    return $table
+        ->columns([
+            TextColumn::make('id'),
+            TextColumn::make('customer_name'),
+            TextColumn::make('status'),
+            TextColumn::make('total'),
+            TextColumn::make('created_at')->dateTime(),
+        ])
+        ->headerActions([
+            ExportAction::make()
+                ->label('Export Excel')
+                ->fileName(fn () => 'orders-' . now()->format('Ymd_His'))
+                ->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
+        ]);
+}

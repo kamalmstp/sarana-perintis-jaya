@@ -25,6 +25,9 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RichContent;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class OrderProsesResource extends Resource
 {
@@ -244,6 +247,9 @@ class OrderProsesResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
 
+            ])
+            ->headerActions([
+                ExportAction::make(),
             ])
             ->bulkActions([
                     Tables\Actions\BulkActionGroup::make([

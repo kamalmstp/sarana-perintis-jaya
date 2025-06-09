@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoicePrintController;
+use App\Http\Controllers\NotaController;
 use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -12,6 +13,7 @@ Route::get('/invoices/{invoice}/pdf-preview', function (Invoice $invoice) {
 
 Route::get('/invoice/{invoice}/pdf', [InvoicePrintController::class, 'download'])->name('invoice.pdf');
 
+Route::get('/nota/{orderDetail}/cetak', [NotaController::class, 'cetak'])->name('nota.cetak');
 // Route::get('/', function () {
 //     return view('welcome');
 // });

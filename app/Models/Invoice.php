@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class Invoice extends Model
 {
-    //
-
     // add fillable
     protected $fillable = [
         'order_id',
@@ -69,7 +67,7 @@ class Invoice extends Model
     {
         $journal = JournalEntry::create([
             'date' => $this->invoice_date,
-            'description' => 'Invoice #' . $this->invoice_number,
+            'description' => 'Tagihan Invoice #' . $this->invoice_number,
             'reference_type' => self::class,
             'reference_id' => $this->id,
         ]);

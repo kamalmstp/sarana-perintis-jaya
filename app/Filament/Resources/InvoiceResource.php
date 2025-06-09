@@ -218,7 +218,7 @@ class InvoiceResource extends Resource
                         ->requiresConfirmation()
                         ->action(function ($record) {
                             $record->update(['paid_at' => now(), 'status' => 'paid']);
-                            $record->createJournalOnPayment();
+//                            $record->createJournalOnPayment();
 
                             Notification::make()
                                 ->title('Invoice ditandai sebagai dibayar.')

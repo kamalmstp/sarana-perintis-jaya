@@ -40,6 +40,12 @@ class BiayaTruckingForm
         }
 
         return [
+            TextInput::make('no_kwitansi')
+                ->label('No Kwitansi'),
+            
+            TextInput::make('no_surat_jalan')
+                ->label('No Surat Jalan'),
+
             TextInput::make('tarif_rental')
                 ->numeric()
                 ->prefix('Rp')
@@ -60,7 +66,7 @@ class BiayaTruckingForm
         return $record->rentalCost 
             ?
         $record->rentalCost->only([
-            'tarif_rental'
+            'tarif_rental', 'no_kwitansi', 'no_surat_jalan'
         ]) : [];
     }
 

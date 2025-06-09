@@ -65,7 +65,7 @@ class OrderDetailResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['driverCost', 'rentalCost', 'trucks']);
+            ->with(['driverCost', 'trucks', 'rentalCost.rental']);
     }
 
     public static function form(Form $form): Form
@@ -212,6 +212,18 @@ class OrderDetailResource extends Resource
                                 TextInput::make('no_surat_jalan')
                                     ->visible(fn(Get $get) => $get('ownership') === 'rental')
                                     ->label('No Surat Jalan'),
+                                
+                                Select::make('rental_id')
+                                    ->label('Pemilik')
+                                    ->relationship('rentalCost.rental', 'name')
+                                    ->preload()
+                                    ->searchable()
+                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->createOptionForm([
+                                        TextInput::make('name')->label('Nama'),
+                                        TextInput::make('npwp')->label('NPWP'),
+                                    ])
+                                    ->nullable(),
                                 
                                 Radio::make('pph')
                                     ->label('Pajak')

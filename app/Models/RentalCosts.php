@@ -14,6 +14,7 @@ class RentalCosts extends Model
     // add fillable
     protected $fillable = [
         'order_detail_id',
+        'rental_id',
         'tarif_rental',
         'no_kwitansi',
         'no_surat_jalan',
@@ -29,5 +30,10 @@ class RentalCosts extends Model
     public function orderDetail(): BelongsTo
     {
         return $this->belongsTo(OrderDetail::class, 'order_detail_id');
+    }
+
+    public function rental(): BelongsTo
+    {
+        return $this->belongsTo(Rental::class, 'rental_id')->withDefault();
     }
 }

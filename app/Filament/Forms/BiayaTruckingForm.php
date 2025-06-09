@@ -47,6 +47,18 @@ class BiayaTruckingForm
             TextInput::make('no_surat_jalan')
                 ->label('No Surat Jalan'),
 
+            Select::make('rental_id')
+                ->label('Pemilik')
+                ->relationship('rentalCost.rental', 'name')
+                ->preload()
+                ->searchable()
+                ->createOptionForm([
+                    TextInput::make('name')->label('Nama'),
+                    TextInput::make('npwp')->label('NPWP'),
+                ])
+                ->nullable(),
+                
+
             Radio::make('pph')
                 ->label('Pajak')
                 ->options([
@@ -74,7 +86,7 @@ class BiayaTruckingForm
         return $record->rentalCost 
             ?
         $record->rentalCost->only([
-            'tarif_rental', 'no_kwitansi', 'no_surat_jalan', 'pph'
+            'tarif_rental', 'rental_id', 'no_kwitansi', 'no_surat_jalan', 'pph'
         ]) : [];
     }
 

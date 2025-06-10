@@ -58,6 +58,11 @@ class OrderProses extends Model
         return $this->order_detail()->sum('netto');
     }
 
+    public function getCustomLabelAttribute()
+    {
+        return "{$this->orders->customers->name} - DO: {$this->do_number} / PO: {$this->po_number} / SO: {$this->so_number}";
+    }
+
     public function getStatusAttribute(): string
     {
         $total = $this->order_detail()->count();

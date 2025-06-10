@@ -76,99 +76,102 @@ class OrderDetailResource extends Resource
                     ->schema([
                         Section::make('Order (Trucking)')
                             ->schema([
-                                Forms\Components\Select::make('order_proses_id')
-                                ->label('No DO/PO/SO')
-                                ->relationship('order_proses', 'id')
-                                ->options(function(){
-                                    return \App\Models\OrderProses::with('orders.customers')->get()->mapWithKeys(
-                                        fn ($order) => [
-                                            $order->id => "{$order->orders->customers->name} - DO: {$order->do_number} / PO: {$order->po_number} / SO: {$order->so_number}",
-                                        ]
-                                    );
-                                })
-                                ->searchable()
-                                ->preload()
-                                ->required(),
+
+                                Forms\Components\Group::make([
+                                    Forms\Components\Hidden::make('order_proses_id')
+                                        ->default(fn () => request()->input('ownerRecord.id'))
+                                        ->visible(fn () => request()->filled('ownerRecord')),
+
+                                    Forms\Components\Select::make('order_proses_id')
+                                        ->label('No DO/PO/SO')
+                                        ->relationship(name: 'order_proses', titleAttribute: 'custom_label')
+                                        ->getOptionLabelFromRecordUsing(fn ($record) => $record->custom_label)
+                                        ->searchable()
+                                        ->preload()
+                                        ->required()
+                                        ->default(fn () => request()->input('ownerRecord.id'))
+                                        ->visible(fn () => !request()->filled('ownerRecord')),
+                                ]),
 
                                 Fieldset::make('Trucking')
-                                ->schema([
-                                    Forms\Components\DatePicker::make('date_detail')
-                                    ->label('Tanggal')
-                                    ->required(),
-                                    Forms\Components\Select::make('truck_id')
-                                    ->label('Truck')
-                                    ->relationship('trucks','plate_number')
-                                    ->preload()
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, Set $set){
-                                        $ownership = Truck::find($state)?->ownership;
-                                        $set('ownership', $ownership);
-                                    })
-                                    ->searchable()
-                                    ->createOptionForm(fn (Form $form) => TruckResource::form($form))
-                                    ->default(null),
-                                    Forms\Components\Select::make('driver_id')
-                                    ->label('Driver')
-                                    ->relationship('drivers','name')
-                                    ->preload()
-                                    ->searchable()
-                                    ->createOptionForm(fn (Form $form) => DriverResource::form($form))
-                                    ->default(null),
-                                ]),
+                                    ->schema([
+                                        Forms\Components\DatePicker::make('date_detail')
+                                            ->label('Tanggal')
+                                            ->required(),
+
+                                        Forms\Components\Select::make('truck_id')
+                                            ->label('Truck')
+                                            ->relationship('trucks', 'plate_number')
+                                            ->preload()
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Set $set) {
+                                                $ownership = Truck::find($state)?->ownership;
+                                                $set('ownership', $ownership);
+                                            })
+                                            ->searchable()
+                                            ->createOptionForm(fn (Form $form) => TruckResource::form($form))
+                                            ->dehydrated()
+                                            ->required(),
+                                        
+                                        Forms\Components\Hidden::make('ownership')
+                                            ->dehydrated()
+                                            ->reactive(),
+
+                                        Forms\Components\Select::make('driver_id')
+                                            ->label('Driver')
+                                            ->relationship('drivers', 'name')
+                                            ->preload()
+                                            ->searchable()
+                                            ->createOptionForm(fn (Form $form) => DriverResource::form($form))
+                                            ->default(null),
+                                    ]),
 
                                 Fieldset::make('Pengiriman')
-                                ->schema([
-                                    Forms\Components\TextInput::make('bag_send')
-                                        ->label('Kirim')
-                                        ->suffix('Bag')
-                                        ->numeric()
-                                        ->default(null),
-                                    
-                                    Forms\Components\TextInput::make('bag_received')
-                                        ->label('Terima')
-                                        ->suffix('Bag')
-                                        ->numeric()
-                                        ->default(null),
-                                ]),
+                                    ->schema([
+                                        Forms\Components\TextInput::make('bag_send')
+                                            ->label('Kirim')
+                                            ->suffix('Bag')
+                                            ->numeric()
+                                            ->default(null),
+
+                                        Forms\Components\TextInput::make('bag_received')
+                                            ->label('Terima')
+                                            ->suffix('Bag')
+                                            ->numeric()
+                                            ->default(null),
+                                    ]),
 
                                 Fieldset::make('Berat')
-                                ->schema([
-                                    Forms\Components\TextInput::make('bruto')
-                                        ->label('Bruto')
-                                        ->numeric()
-                                        ->live()
-                                        ->reactive()
-                                        ->default(null),
-                                    
-                                    Forms\Components\TextInput::make('tara')
-                                        ->label('Tara')
-                                        ->numeric()
-                                        ->live()
-                                        ->reactive()
-                                        ->default(null),
-                                    
-                                    Forms\Components\Placeholder::make('netto')
-                                        ->content(
-                                            function(callable $get, callable $set){
-                                            $bruto = (float) $get('bruto');
-                                            $tara = (float) $get('tara');
+                                    ->schema([
+                                        Forms\Components\TextInput::make('bruto')
+                                            ->label('Bruto')
+                                            ->numeric()
+                                            ->live()
+                                            ->reactive()
+                                            ->default(null),
 
-                                            return $bruto-$tara;
-                                        }
-                                        ),
+                                        Forms\Components\TextInput::make('tara')
+                                            ->label('Tara')
+                                            ->numeric()
+                                            ->live()
+                                            ->reactive()
+                                            ->default(null),
 
-                                ])
-                                ->columns(3),
+                                        Forms\Components\Placeholder::make('netto')
+                                            ->content(function (callable $get, callable $set) {
+                                                $bruto = (float) $get('bruto');
+                                                $tara = (float) $get('tara');
+                                                return $bruto - $tara;
+                                            }),
+                                    ])
+                                    ->columns(3),
 
                                 Forms\Components\RichEditor::make('note_detail')
-                                ->label('Keterangan')
-                                ->columnSpanFull(),
-                                
+                                    ->label('Keterangan')
+                                    ->columnSpanFull(),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
-
-                Hidden::make('ownership')->reactive(),
 
                 Group::make()
                     ->schema([
@@ -177,66 +180,65 @@ class OrderDetailResource extends Resource
                                 TextInput::make('uang_sangu')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
                                     ->label('Uang Sangu'),
 
                                 TextInput::make('uang_jalan')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
                                     ->label('Uang Jalan'),
 
                                 TextInput::make('uang_bbm')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
                                     ->label('Uang BBM'),
 
                                 TextInput::make('uang_kembali')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
                                     ->label('Uang Kembali'),
 
                                 TextInput::make('gaji_supir')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'company')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
                                     ->label('Gaji Supir'),
 
-                                
                                 TextInput::make('no_kwitansi')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
                                     ->label('No Kwitansi'),
-                                
+
                                 TextInput::make('no_surat_jalan')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
                                     ->label('No Surat Jalan'),
-                                
+
                                 Select::make('rental_id')
                                     ->label('Pemilik')
                                     ->relationship('rentalCost.rental', 'name')
                                     ->preload()
                                     ->searchable()
-                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
                                     ->createOptionForm([
                                         TextInput::make('name')->label('Nama'),
                                         TextInput::make('npwp')->label('NPWP'),
                                     ])
                                     ->nullable(),
-                                
+
                                 Radio::make('pph')
                                     ->label('Pajak')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
                                     ->options([
                                         '0.2' => 'NPWP',
-                                        '0.05' => 'SKB'
+                                        '0.05' => 'SKB',
                                     ]),
-                                
+
                                 TextInput::make('tarif_rental')
                                     ->numeric()
                                     ->prefix('Rp')
-                                    ->visible(fn(Get $get) => $get('ownership') === 'rental')
+                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
                                     ->label('Tarif Rental'),
                             ])
                     ])

@@ -3,15 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TruckMaintenanceResource\Pages;
-use App\Filament\Resources\TruckMaintenanceResource\RelationManagers;
+use App\Models\Truck;
 use App\Models\TruckMaintenance;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\PresetScope;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TruckMaintenanceResource extends Resource
 {
@@ -39,29 +38,33 @@ class TruckMaintenanceResource extends Resource
             'force_delete_any',
         ];
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\DatePicker::make('date')
+                    ->label('Tanggal')
+                    ->required(),
+
                 Forms\Components\TextInput::make('name')
                     ->label('Nama Pengeluaran')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\Select::make('truck_id')
                     ->label('No Polisi')
-                    ->relationship('trucks','plate_number')
+                    ->relationship('trucks', 'plate_number')
                     ->searchable()
                     ->preload()
-                    ->createOptionForm(fn (Form $form) => TruckResource::form($form))
+                    ->createOptionForm(fn (Form $form) => \App\Filament\Resources\TruckResource::form($form))
                     ->required(),
-                Forms\Components\DatePicker::make('date')
-                    ->label('Tanggal')
-                    ->required(),
+
                 Forms\Components\TextInput::make('qty')
                     ->label('Jumlah')
                     ->required()
                     ->numeric(),
+
                 Forms\Components\TextInput::make('price')
                     ->label('Harga')
                     ->required()
@@ -78,44 +81,44 @@ class TruckMaintenanceResource extends Resource
                     ->label('Tanggal')
                     ->date()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Item')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('trucks.plate_number')
                     ->label('No Polisi')
                     ->searchable()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('qty')
                     ->label('Jumlah')
                     ->numeric()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('price')
                     ->label('Harga')
-                    ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('jumlah')
                     ->label('Total')
-                    ->getStateUsing(function($record) {
-                            $tot = $record->price * $record->qty;
-                            return "Rp ".number_format($tot, 0, ',', '.'); // Rumus perkalian
-                        })
+                    ->getStateUsing(fn ($record) => 'Rp ' . number_format($record->price * $record->qty, 0, ',', '.'))
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-   Tables\Actions\DeleteAction::make(),
-
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -126,9 +129,7 @@ class TruckMaintenanceResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

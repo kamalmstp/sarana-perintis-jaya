@@ -38,6 +38,10 @@ class OrderDetailRelationManager extends RelationManager
                             'order_proses_id'   => $this->getOwnerRecord()->id,
                         ];
                     })
+                    ->mutateFormDataUsing(function (array $data): array {
+                        $data['order_proses_id'] = $this->getOwnerRecord()->id;
+                        return $data;
+                    })
                     ->successNotification(
                         Notification::make()
                             ->success(),

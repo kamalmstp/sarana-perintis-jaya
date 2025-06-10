@@ -187,9 +187,9 @@ class OrderProsesResource extends Resource
                     ->label('Nomor')
                     ->formatStateUsing(function ($record){
                         return collect([
-                            $record->do_number ? "DO: {$record->do_number}" : "DO: -",
-                            $record->po_number ? "PO: {$record->po_number}" : "PO: -",
                             $record->so_number ? "SO: {$record->so_number}" : "SO: -",
+                            $record->po_number ? "PO: {$record->po_number}" : "PO: -",
+                            $record->do_number ? "DO: {$record->po_number}" : "DO: -",
                         ])->filter()->join('<br>');
                     })->html()
                     ->searchable(),

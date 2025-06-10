@@ -84,7 +84,7 @@ class OrderDetailResource extends Resource
 
                                     Forms\Components\Select::make('order_proses_id')
                                         ->label('No DO/PO/SO')
-                                        ->relationship(name: 'order_proses', titleAttribute: 'custom_label')
+                                        ->relationship(name: 'order_proses', titleAttribute: 'do_number')
                                         ->getOptionLabelFromRecordUsing(fn ($record) => $record->custom_label)
                                         ->searchable()
                                         ->preload()

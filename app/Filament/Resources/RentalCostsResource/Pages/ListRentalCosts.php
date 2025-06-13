@@ -15,7 +15,7 @@ class ListRentalCosts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            //Actions\CreateAction::make(),
         ];
     }
 
@@ -34,5 +34,10 @@ class ListRentalCosts extends ListRecords
                    $query->where('status', 'selesai')
                ),
         ];
+    }
+
+    public function getDefaultActiveTab(): string | int | null
+    {
+        return 'belum';
     }
 }

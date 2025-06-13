@@ -19,6 +19,7 @@ class TruckMaintenanceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?string $navigationGroup = 'Order Management';
     protected static ?string $navigationLabel = 'Truck Service';
+    protected static ?string $label = 'Truck Service';
     protected static ?int $navigationSort = 5;
 
     public static function getPermissionPrefixes(): array
@@ -54,7 +55,9 @@ class TruckMaintenanceResource extends Resource
 
                 Forms\Components\Select::make('truck_id')
                     ->label('No Polisi')
-                    ->relationship('trucks', 'plate_number')
+                    ->relationship('trucks', 'plate_number', 
+                        fn ($query) => $query->where('ownership', 'company')
+                    )
                     ->searchable()
                     ->preload()
                     ->createOptionForm(fn (Form $form) => \App\Filament\Resources\TruckResource::form($form))
@@ -116,6 +119,11 @@ class TruckMaintenanceResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->filters([])
+            ->modifyQueryUsing(function ($query) {
+                return $query->latest();
+            })
+            ->paginated()
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

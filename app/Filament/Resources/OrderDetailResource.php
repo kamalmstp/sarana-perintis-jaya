@@ -310,6 +310,10 @@ class OrderDetailResource extends Resource
             ->filters([
                 //
             ])
+            ->modifyQueryUsing(function ($query) {
+                return $query->latest();
+            })
+            ->paginated()
             ->actions([
                 ActionGroup::make([
                     Action::make('isi_biaya')

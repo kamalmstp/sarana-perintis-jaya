@@ -187,9 +187,9 @@ class OrderProsesResource extends Resource
                     ->label('Nomor')
                     ->formatStateUsing(function ($record){
                         return collect([
-                            $record->so_number ? "SO: {$record->so_number}" : "SO: -",
-                            $record->po_number ? "PO: {$record->po_number}" : "PO: -",
-                            $record->do_number ? "DO: {$record->po_number}" : "DO: -",
+                            $record->do_number ? "DO: {$record->do_number}" : "",
+                            $record->po_number ? "PO: {$record->po_number}" : "",
+                            $record->so_number ? "SO: {$record->so_number}" : "",
                         ])->filter()->join('<br>');
                     })->html()
                     ->searchable(),
@@ -242,6 +242,10 @@ class OrderProsesResource extends Resource
             ->filters([
                 //
             ])
+            ->modifyQueryUsing(function ($query) {
+                return $query->latest();
+            })
+            ->paginated()
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),

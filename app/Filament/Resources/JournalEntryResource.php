@@ -22,7 +22,7 @@ class JournalEntryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-currency-dollar';
     protected static ?string $navigationGroup = 'Finance';
     protected static ?string $navigationLabel = 'Jurnal Umum';
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     public static function getPermissionPrefixes(): array
     {

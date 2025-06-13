@@ -160,6 +160,10 @@ class OrderResource extends Resource
             ->filters([
                 //
             ])
+            ->modifyQueryUsing(function ($query) {
+                return $query->latest();
+            })
+            ->paginated()
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),

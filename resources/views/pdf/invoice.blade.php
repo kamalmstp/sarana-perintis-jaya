@@ -9,26 +9,72 @@
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .text-bold { font-weight: bold; }
+        .text-top { vertical-align: text-top; }
         .bordered td, .bordered th { border: 1px solid #000; padding: 6px; }
         .no-border td { padding: 3px 6px; }
         .mt-2 { margin-top: 10px; }
         .mt-4 { margin-top: 20px; }
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            text-align:center;
+            gap: 10px;
+            font-family: 'Times New Roman', serif;
+            margin-bottom: 20px;
+        }
+
+        .kop-surat .spj {
+            font-size: 68px;
+            font-weight: bold;
+            font-style: italic;
+            color: #d52b2b; /* merah */
+        }
+
+        .kop-surat .nama-perusahaan {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003366; /* biru tua */
+        }
     </style>
 </head>
 <body>
 
-    <h2 class="text-center text-bold">INVOICE</h2>
+    <div class="kop-surat">
+        <table style=" width:100%;border-bottom:1px solid;">
+            <tr style="text-align: center;border-bottom:1px solid;">
+                <td style="">
+
+                </td>
+                <td style="width: 25%; text-align: right;">
+                    <span class="spj">SPJ</span>
+                </td>
+                <td style="width: 63%; text-align: center; padding-top:10;">
+                    <span class="nama-perusahaan">CV SARANA PERINTIS JAYA</span>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <h2 class="text-center text-bold text-underline">INVOICE</h2>
 
     <table class="no-border">
         <tr>
             <td width="20%">Kepada Yth</td>
             <td width="2%">:</td>
             <td>
-                <strong>PT TANTAHAN PANDUHUP ASI</strong><br>
-                Cambridge City Square LT 3<br>
-                Jl. S. Parman No. 217<br>
-                Medan 20152
+                <strong>{{ $invoice->order->customers->name }}</strong>
             </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td>{{ $invoice->order->customers->address }}</td>
+        </tr>
+        <tr>
+            <td>Fax</td>
+            <td>:</td>
+            <td></td>
         </tr>
         <tr>
             <td>Nomor</td>
@@ -37,55 +83,44 @@
         </tr>
     </table>
 
-    <p class="text-center text-bold mt-2">
-        Ongkos angkut kernel TPA sampai ke Gudang KTN
-    </p>
 
     <table class="bordered mt-2">
         <thead>
             <tr>
+                <th colspan="2">
+                    {{ $invoice->notes }}
+                </th>
+            </tr>
+            <tr>
                 <th>DESCRIPTION</th>
-                <th>LOKASI</th>
                 <th class="text-right">UNIT PRICE</th>
             </tr>
         </thead>
         <tbody>
+            @foreach ($invoice->items as $item)
             <tr>
-                <td>
-                    1. Perincian pembayaran:<br>
-                    Kontrak 014/DO/TPA-PK/IV/2025<br>
-                    151,140 kg x 355,-/MT<br><br>
-
-                    Kontrak 017/DO/TPA-PK/IV/2025<br>
-                    64,090 kg x 355,-/MT<br><br>
-
-                    Kontrak 017/DO/TPA-PK/IV/2025<br>
-                    11,360 kg x 350,-/MT<br><br>
-
-                    Kontrak 019/DO/TPA-PK/IV/2025<br>
-                    125,670 kg x 350,-/MT
+                <td style="border-bottom:none; border-top:none;">
+                    {{ $item->order_proses->locations->name }}  &nbsp;&nbsp;&nbsp;
+                    {{ $item->order_proses->item_proses }} &nbsp;&nbsp;&nbsp;
+                    {{ $item->order_proses->total_netto ?? '-' }}&nbsp;Kg &nbsp; X &nbsp;
+                    Rp &nbsp;{{ number_format($item->order_proses->tarif, 0, ',', '.') }}
                 </td>
-                <td>
-                    Gudang KTN<br><br>
-                    Gudang KTN<br><br>
-                    Gudang KTN<br><br>
-                    Gudang KTN
-                </td>
-                <td class="text-right">
-                    53.654.700<br><br>
-                    22.751.950<br><br>
-                    3.976.000<br><br>
-                    43.984.500
+                <td class="text-right" style="border-bottom:none; border-top:none;">
+                    Rp {{ number_format($item->amount, 0, ',', '.') }}
                 </td>
             </tr>
+            @endforeach
             <tr>
-                <td colspan="2" class="text-bold text-right">TOTAL</td>
+                <td style="border-top:none;"></td><td style="border-top:none;"></td>
+            </tr>
+            <tr>
+                <td class="text-bold text-right">TOTAL</td>
                 <td class="text-right text-bold">Rp {{ number_format($invoice->total_amount, 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>
 
-    <p class="mt-2"><strong>Terbilang:</strong> Seratus Dua Puluh Empat Juta Tiga Ratus Enam Puluh Tujuh Ribu Seratus Lima Puluh Rupiah.</p>
+    <p class="mt-2"><strong>Terbilang:</strong> {{ ucwords(terbilang($invoice->total_amount)) }} Rupiah.</p>
 
     <table class="mt-4" width="100%">
         <tr>

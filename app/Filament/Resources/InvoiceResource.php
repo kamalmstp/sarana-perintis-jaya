@@ -172,6 +172,10 @@ class InvoiceResource extends Resource
                             ->numeric()
                             ->reactive()
                             ->extraAttributes(['class' => 'text-right sm:text-right']),
+
+                        TextInput::make('notes')
+                            ->label('Deskription')
+                            
                     ]),
             ]);
     }
@@ -201,6 +205,9 @@ class InvoiceResource extends Resource
                     ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.')),
             ])
             ->filters([])
+            ->modifyQueryUsing(function ($query) {
+                return $query->latest();
+            })
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('download_pdf')
@@ -218,8 +225,6 @@ class InvoiceResource extends Resource
                         ->requiresConfirmation()
                         ->action(function ($record) {
                             $record->update(['paid_at' => now(), 'status' => 'paid']);
-//                            $record->createJournalOnPayment();
-
                             Notification::make()
                                 ->title('Invoice ditandai sebagai dibayar.')
                                 ->success()

@@ -37,6 +37,11 @@ class RentalCosts extends Model
         return $this->belongsTo(Rental::class, 'rental_id')->withDefault();
     }
 
+    public function rentalPayments()
+    {
+        return $this->belongsToMany(RentalPayment::class, 'rental_costs_rental_payment');
+    }
+
     public function getBiayaRentalAttribute(): float
     {
         $qty = $this->orderDetail?->netto ?? 0;

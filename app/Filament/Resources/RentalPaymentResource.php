@@ -22,9 +22,9 @@ class RentalPaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationGroup = 'Finance';
-    protected static ?string $label = 'Nota Pembayaran';
-    protected static ?string $navigationLabel = 'Nota Pembayaran';
-    protected static ?int $navigationSort = 8;
+    protected static ?string $label = 'Nota Replas';
+    protected static ?string $navigationLabel = 'Nota Replas';
+    protected static ?int $navigationSort = 7;
 
     public static function form(Form $form): Form
     {

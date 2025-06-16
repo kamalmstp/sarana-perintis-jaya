@@ -134,6 +134,6 @@ class RentalCostsResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return 'Biaya Replas';
+        return 'Biaya Angkutan';
     }
 }

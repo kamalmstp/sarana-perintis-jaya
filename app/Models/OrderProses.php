@@ -53,6 +53,11 @@ class OrderProses extends Model
         return $this->hasMany(OrderDetail::class);
     }
 
+    public function laborPaymentDetails(): HasMany
+    {
+        return $this->hasMany(LaborPaymentDetail::class);
+    }
+
     public function getTotalNettoAttribute()
     {
         return $this->order_detail()->sum('netto');

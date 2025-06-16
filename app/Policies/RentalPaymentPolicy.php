@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\OrderDetail;
+use App\Models\RentalPayment;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class OrderDetailPolicy
+class RentalPaymentPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class OrderDetailPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_rental::costs');
+        return $user->can('view_any_rental::payment');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, OrderDetail $orderDetail): bool
+    public function view(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('view_rental::costs');
+        return $user->can('view_rental::payment');
     }
 
     /**
@@ -31,23 +31,23 @@ class OrderDetailPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_rental::costs');
+        return $user->can('create_rental::payment');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, OrderDetail $orderDetail): bool
+    public function update(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('update_rental::costs');
+        return $user->can('update_rental::payment');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, OrderDetail $orderDetail): bool
+    public function delete(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('delete_rental::costs');
+        return $user->can('delete_rental::payment');
     }
 
     /**
@@ -55,15 +55,15 @@ class OrderDetailPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_rental::costs');
+        return $user->can('delete_any_rental::payment');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, OrderDetail $orderDetail): bool
+    public function forceDelete(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('force_delete_rental::costs');
+        return $user->can('force_delete_rental::payment');
     }
 
     /**
@@ -71,15 +71,15 @@ class OrderDetailPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_rental::costs');
+        return $user->can('force_delete_any_rental::payment');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, OrderDetail $orderDetail): bool
+    public function restore(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('restore_rental::costs');
+        return $user->can('restore_rental::payment');
     }
 
     /**
@@ -87,15 +87,15 @@ class OrderDetailPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_rental::costs');
+        return $user->can('restore_any_rental::payment');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, OrderDetail $orderDetail): bool
+    public function replicate(User $user, RentalPayment $rentalPayment): bool
     {
-        return $user->can('replicate_rental::costs');
+        return $user->can('replicate_rental::payment');
     }
 
     /**
@@ -103,6 +103,6 @@ class OrderDetailPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_rental::costs');
+        return $user->can('reorder_rental::payment');
     }
 }

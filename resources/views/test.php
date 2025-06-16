@@ -1,30 +1,39 @@
-<?php
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 
-use Filament\Actions\Action;
-use Illuminate\Support\Facades\Storage;
-use Barryvdh\DomPDF\Facade\Pdf;
+return [
+    Select::make('order_proses_id')
+        ->label('Nomor DO')
+        ->relationship('orderProses', 'no_do')
+        ->searchable()
+        ->required(),
 
-class ViewRentalPayment extends ViewRecord
-{
-    protected static string $resource = RentalPaymentResource::class;
+    TextInput::make('kebun')
+        ->label('Nama Kebun')
+        ->required(),
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('Cetak Kwitansi')
-                ->icon('heroicon-o-printer')
-                ->action(function () {
-                    $payment = $this->record->load('rental', 'rentalCosts.orderDetail.truck');
+    TextInput::make('qty')
+        ->label('Qty (Kg)')
+        ->numeric()
+        ->required(),
 
-                    $pdf = Pdf::loadView('pdf.rental-kwitansi', [
-                        'payment' => $payment,
-                    ]);
+    TextInput::make('tarif_per_kg')
+        ->label('Tarif / Kg')
+        ->numeric()
+        ->prefix('Rp')
+        ->required(),
 
-                    return response()->streamDownload(
-                        fn () => print($pdf->output()),
-                        'kwitansi-rental-' . $payment->id . '.pdf'
-                    );
-                })
-        ];
-    }
-}
+    TextInput::make('total')
+        ->label('Total Upah')
+        ->disabled()
+        ->dehydrated(false)
+        ->reactive()
+        ->afterStateHydrated(function ($component, $state, $record) {
+            if ($record) {
+                $component->state($record->qty * $record->tarif_per_kg);
+            }
+        })
+        ->afterStateUpdated(function ($set, $get) {
+            $set('total', (int)$get('qty') * (int)$get('tarif_per_kg'));
+        }),
+];

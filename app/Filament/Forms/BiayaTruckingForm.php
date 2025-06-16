@@ -62,8 +62,8 @@ class BiayaTruckingForm
             Radio::make('pph')
                 ->label('Pajak')
                 ->options([
-                    '0.02' => 'NPWP',
-                    '0.005' => 'SKB'
+                    '0.02' => 'NPWP (2%)',
+                    '0.005' => 'SKB (0.5%)'
                 ]),
 
             TextInput::make('tarif_rental')

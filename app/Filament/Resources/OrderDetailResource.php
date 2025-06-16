@@ -164,7 +164,7 @@ class OrderDetailResource extends Resource
                                             ->numeric()
                                             ->live()
                                             ->reactive()
-                                            ->default(null),
+                                            ->default(0),
 
                                         Forms\Components\Placeholder::make('netto')
                                             ->content(function (callable $get, callable $set) {

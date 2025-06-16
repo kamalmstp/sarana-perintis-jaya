@@ -21,7 +21,7 @@ class AccountResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
     protected static ?string $navigationGroup = 'Finance';
     protected static ?string $navigationLabel = 'Daftar Akun';
-    protected static ?int $navigationSort = 9;
+    protected static ?int $navigationSort = 10;
 
 
 

@@ -13,6 +13,9 @@ Route::get('/invoices/{invoice}/pdf-preview', function (Invoice $invoice) {
 
 Route::get('/invoice/{invoice}/pdf', [InvoicePrintController::class, 'download'])->name('invoice.pdf');
 
+Route::get('/labor-payments/{laborPayment}/receipt', [App\Http\Controllers\LaborPaymentPrintController::class, 'pdf'])
+    ->name('labor-payments.receipt');
+
 Route::get('/nota/{orderDetail}/cetak', [NotaController::class, 'cetak'])->name('nota.cetak');
 // Route::get('/', function () {
 //     return view('welcome');

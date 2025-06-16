@@ -17,10 +17,10 @@ class TruckMaintenanceResource extends Resource
     protected static ?string $model = TruckMaintenance::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
-    protected static ?string $navigationGroup = 'Order Management';
+    protected static ?string $navigationGroup = 'Finance';
     protected static ?string $navigationLabel = 'Truck Service';
     protected static ?string $label = 'Truck Service';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     public static function getPermissionPrefixes(): array
     {

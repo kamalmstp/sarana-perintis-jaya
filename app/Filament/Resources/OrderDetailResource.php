@@ -36,9 +36,14 @@ class OrderDetailResource extends Resource
     protected static ?string $model = OrderDetail::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationGroup = 'Order Management';
+    protected static ?string $navigationGroup = 'Order';
     protected static ?string $navigationLabel = 'Order (Trucking)';
     protected static ?int $navigationSort = 4;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function getPermissionPrefixes(): array
     {
@@ -335,15 +340,6 @@ class OrderDetailResource extends Resource
                     ->modalWidth('md')
                     ->color('primary'),
 
-                    Action::make('cetak_nota')
-                        ->label('Cetak Nota')
-                        ->color('warning')
-                        ->icon('heroicon-o-printer')
-                        ->visible(fn ($record) =>
-                            $record->trucks->ownership === "rental")
-                        ->url(fn ($record) => route('nota.cetak', $record))
-                        ->openUrlInNewTab(),
-
                     Action::make('selesaikan')
                         ->label('Selesaikan')
                         ->icon('heroicon-m-check-circle')
@@ -374,7 +370,7 @@ class OrderDetailResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->label('Export Excel'),
-//                    ->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
+                    //->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

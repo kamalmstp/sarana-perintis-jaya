@@ -30,10 +30,10 @@ class RentalCostsResource extends Resource
 {
     protected static ?string $model = OrderDetail::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?string $navigationGroup = 'Finance';
-    protected static ?string $label = 'Biaya Replas';
-    protected static ?string $navigationLabel = 'Biaya Replas';
+    protected static ?string $label = 'Biaya Angkutan';
+    protected static ?string $navigationLabel = 'Biaya Angkutan';
     protected static ?int $navigationSort = 7;
 
     public static function table(Table $table): Table

@@ -34,7 +34,7 @@ class OrderProsesResource extends Resource
     protected static ?string $model = OrderProses::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-    protected static ?string $navigationGroup = 'Order Management';
+    protected static ?string $navigationGroup = 'Order';
     protected static ?string $navigationLabel = 'Order (DO/PO/SO)';
     protected static ?int $navigationSort = 3;
 

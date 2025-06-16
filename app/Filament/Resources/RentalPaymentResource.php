@@ -20,7 +20,11 @@ class RentalPaymentResource extends Resource
 {
     protected static ?string $model = RentalPayment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $navigationGroup = 'Finance';
+    protected static ?string $label = 'Nota Pembayaran';
+    protected static ?string $navigationLabel = 'Nota Pembayaran';
+    protected static ?int $navigationSort = 8;
 
     public static function form(Form $form): Form
     {

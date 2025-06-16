@@ -76,7 +76,7 @@
             <td colspan="2" style="text-align: center;"><strong>NOTA PEMBAYARAN ANGKUTAN</strong></td>
             <td>No. Urut</td>
             <td>:</td>
-            <td>{{ $record->receipt_number ?? '-' }}</td>
+            <td>{{ $payment->receipt_number ?? '-' }}</td>
         </tr>
         <tr>
             <td>Kepada Yth (Nama/NPWP)</td>

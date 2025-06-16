@@ -64,11 +64,16 @@ class RentalPaymentResource extends Resource
                                 ->with('orderDetail.trucks')
                                 ->get()
                                 ->mapWithKeys(function ($cost) {
-                                    $truck = $cost->orderDetail->trucks->plate_number ?? '-';
-                                    $driver = $cost->orderDetail->drivers->name ?? '-';
-                                    $qty = number_format($cost->orderDetail->netto, 0, ',', '.') ?? 1;
-                                    $tarif = number_format($cost->tarif_rental, 0, ',', '.');
-                                    $total = number_format($cost->tarif_rental * $qty, 0, ',', '.');
+                                    $orderDetail = $cost->orderDetail;
+
+                                    $truck = $orderDetail?->trucks?->plate_number ?? '-';
+                                    $driver = $orderDetail?->drivers?->name ?? '-';
+                                    $qtyVal = $orderDetail?->netto ?? 0;
+                                    $qty = number_format($qtyVal, 0, ',', '.');
+                                    $tarifVal = $cost->tarif_rental ?? 0;
+                                    $tarif = number_format($tarifVal, 0, ',', '.');
+                                    $total = number_format($tarifVal * $qtyVal, 0, ',', '.');
+
                                     return [
                                         $cost->id => "($truck - $driver) | Qty: $qty Kg | Tarif: Rp $tarif | Total: Rp $total"
                                     ];

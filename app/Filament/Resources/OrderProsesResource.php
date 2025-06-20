@@ -23,6 +23,8 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\TextEntry;
@@ -240,7 +242,33 @@ class OrderProsesResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('customer')
+                    ->label('Customer')
+                    ->form([
+                        Select::make('customer_id')
+                            ->label('Pilih Customer')
+                            ->options(
+                                \App\Models\Customer::query()
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                            )
+                            ->searchable()
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query->when($data['customer_id'], function ($query, $customerId) {
+                            return $query->whereHas('orders.customers', function ($q) use ($customerId) {
+                                $q->where('id', $customerId);
+                            });
+                        });
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['customer_id']) {
+                            $customerName = \App\Models\Customer::find($data['customer_id'])?->name;
+                            return $customerName ? "Customer: $customerName" : null;
+                        }
+                        return null;
+                    }),
             ])
             ->modifyQueryUsing(function ($query) {
                 return $query->latest();

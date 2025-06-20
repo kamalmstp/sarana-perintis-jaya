@@ -321,24 +321,6 @@ class OrderDetailResource extends Resource
             ->paginated()
             ->actions([
                 ActionGroup::make([
-                    Action::make('isi_biaya')
-                    ->label('Biaya')
-                    ->tooltip('Biaya Truck')
-                    ->modalHeading('Isi Biaya Truck')
-                    ->form(fn ($record) => BiayaTruckingForm::make($record))
-                    ->fillForm(fn ($record) => BiayaTruckingForm::fill($record))
-                    ->action(function ($data, $record) {
-                        BiayaTruckingForm::save($data, $record);
-
-                        $record->updateStatusAutomatically();
-                        Notification::make()
-                            ->title('Biaya Berhasil disimpan')
-                            ->success()
-                            ->send();
-                    })
-                    ->icon('heroicon-m-currency-dollar')
-                    ->modalWidth('md')
-                    ->color('primary'),
 
                     Action::make('selesaikan')
                         ->label('Selesaikan')

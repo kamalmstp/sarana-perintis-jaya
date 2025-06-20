@@ -17,6 +17,8 @@ use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
@@ -158,8 +160,35 @@ class OrderResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+                    Filter::make('tanggal')
+                        ->form([
+                            DatePicker::make('from')
+                                ->label('Dari Tanggal'),
+                            DatePicker::make('until')
+                                ->label('Sampai Tanggal'),
+                        ])
+                        ->query(function (Builder $query, array $data): Builder {
+                            return $query
+                                ->when($data['from'], fn ($q) => $q->whereDate('spk_date', '>=', $data['from']))
+                                ->when($data['until'], fn ($q) => $q->whereDate('spk_date', '<=', $data['until']));
+                        })
+                        ->indicateUsing(function (array $data): ?string {
+                            if ($data['from'] && $data['until']) {
+                                return 'Dari ' . \Carbon\Carbon::parse($data['from'])->translatedFormat('d M Y') .
+                                    ' sampai ' . \Carbon\Carbon::parse($data['until'])->translatedFormat('d M Y');
+                            }
+
+                            if ($data['from']) {
+                                return 'Dari ' . \Carbon\Carbon::parse($data['from'])->translatedFormat('d M Y');
+                            }
+
+                            if ($data['until']) {
+                                return 'Sampai ' . \Carbon\Carbon::parse($data['until'])->translatedFormat('d M Y');
+                            }
+
+                            return null;
+                        }),
+                ])
             ->modifyQueryUsing(function ($query) {
                 return $query->latest();
             })
@@ -173,10 +202,10 @@ class OrderResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->label('Export Excel'),
-//                    ->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
+                    //->exportFormat(\Maatwebsite\Excel\Excel::XLSX),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

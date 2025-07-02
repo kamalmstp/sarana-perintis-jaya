@@ -207,9 +207,9 @@ class OrderProsesResource extends Resource
                         return collect([$kg, $bag])->filter()->join('<br>');
                     })->html()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('locations.address')
-                //     ->label('Lokasi Tujuan')
-                //     ->sortable(),
+                Tables\Columns\TextColumn::make('locations.name')
+                    ->label('Lokasi Tujuan')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('tarif')
                     ->label('Tarif')
                     ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))

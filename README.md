@@ -1,10 +1,11 @@
 # Website TMS CV. Sarana Perintis Jaya
 TMS (Transport Management System)
 
+    1. Dashboard = Terdapat grafik jumlah orderan, laporan laba rugi, jumlah orderan, saldo kas, dan lainnya
 - Menu Order Management
-    1. Dashboard
-    2. Order by SPK
-    3. Order by DO/PO/SO
+    2. Order by SPK = Untuk membuat orderan pertama kali ketika perusahaan mendapatkan SPK dari pemberi kerja, masukkan berdasarkan form yang ada.
+    Jika sudah mendapatkan nomor DO, bisa juga memasukkan DO dari dalam orderan SPK, silakan klik Order tersebut, lalu klik tab Order DO/PO, dan tambahkan orderan DO
+    3. Order by DO/PO/SO = Untuk menambahkan orderan DO jika sudah mendapatkan nomor DO, di form input, silakan pilih nama perusahaan & nomor SPK nya, lengkapi data. ketika untuk menginput data trucking, silakan klik order yang ingin di pilih, kemudian ke tab trucking dan isi data
 - Menu Finance
     4. Invoice
     5. Truck Service

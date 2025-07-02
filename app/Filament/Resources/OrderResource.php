@@ -126,6 +126,9 @@ class OrderResource extends Resource
                         };
                     })
                     ->sortable(),
+                Tables\Columns\TextColumn::make('locations.name')
+                    ->label('Lokasi Muat')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('total_kg')
                     ->formatStateUsing(function ($record){
                         $kg = $record->total_kg ? number_format($record->total_kg, 0, '.', '.') . ' Kg' : '- Kg' ;

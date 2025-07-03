@@ -21,4 +21,5 @@ class LaborPaymentPrintController extends Controller
             'payment' => $laborPayment,
         ])->stream("Kwitansi-Buruh-{$laborPayment->payment_number}.pdf");
     }
+
 }

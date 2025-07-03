@@ -22,6 +22,8 @@ use Filament\Resources\Resource;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
@@ -30,6 +32,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RichContent;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use App\Exports\OrderProsesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderProsesResource extends Resource
 {
@@ -275,13 +279,19 @@ class OrderProsesResource extends Resource
             })
             ->paginated()
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
 
             ])
             ->headerActions([
-                ExportAction::make(),
+                Action::make('export_excel')
+                    ->label('Export Excel')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn () => url('/export/order-proses'))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                     Tables\Actions\BulkActionGroup::make([

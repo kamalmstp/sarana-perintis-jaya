@@ -68,6 +68,27 @@ class OrderProses extends Model
         return "{$this->orders->customers->name} - DO: {$this->do_number} / PO: {$this->po_number} / SO: {$this->so_number}";
     }
 
+    public function getCustomNumberAttribute()
+    {
+        $parts = [];
+
+        if ($this->do_number !== '-') {
+            $parts[] = "DO: {$this->do_number}";
+        }
+
+        if ($this->po_number) {
+            $parts[] = "PO: {$this->po_number}";
+        }
+
+        if ($this->so_number) {
+            $parts[] = "SO: {$this->so_number}";
+        }
+
+        return implode('<br>', $parts) ?: '—';
+    }
+
+
+
     public function getStatusAttribute(): string
     {
         $total = $this->order_detail()->count();

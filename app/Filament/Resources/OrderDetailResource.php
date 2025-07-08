@@ -78,20 +78,18 @@ class OrderDetailResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Hidden::make('order_proses_id')
+                    ->default(fn () => request()->input('ownerRecord.id'))
+                    ->live()
+                    ->reactive(),
+
                 Group::make()
                     ->schema([
                         Section::make('Order (Trucking)')
                             ->schema([
-
                                 Forms\Components\Group::make([
-                                    Forms\Components\Hidden::make('order_proses_id')
-                                        ->default(fn () => request()->input('ownerRecord.id'))
-                                        ->visible(fn () => request()->filled('ownerRecord')),
-
                                     Forms\Components\Select::make('order_proses_id')
                                         ->label('No DO/PO/SO')
-                                        //->relationship(name: 'order_proses', titleAttribute: 'do_number')
-                                        //->getOptionLabelFromRecordUsing(fn ($record) => $record->custom_label)
                                         ->options(
                                             OrderProses::all()->pluck('custom_label', 'id')
                                         )
@@ -149,6 +147,14 @@ class OrderDetailResource extends Resource
                                             ->numeric()
                                             ->default(null),
                                     ]),
+                                // hanya untuk container terusan
+                                Fieldset::make('Container')
+                                    ->schema([
+                                        TextInput::make('container_number')->label('Nomor Container'),
+                                        TextInput::make('seal_number')->label('Nomor Segel'),
+                                        TextInput::make('lock_number')->label('Nomor Gembok'),
+                                    ])
+                                    ->visible(fn (Get $get) => optional(OrderProses::find($get('order_proses_id')))?->operation_proses === 'Teruskan'),
 
                                 Fieldset::make('Berat')
                                     ->schema([

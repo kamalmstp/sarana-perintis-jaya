@@ -10,8 +10,12 @@ use Filament\Actions\Action;
 use Filament\Support\Enums\ActionSize;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Fieldset;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\ViewEntry;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -22,6 +26,9 @@ use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class OrderResource extends Resource
 {
@@ -56,48 +63,56 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('customer_id')
-                    ->label('Customer')
-                    ->relationship(name: 'customers', titleAttribute:'name')
-                    ->searchable()
-                    ->preload()
-                    ->createOptionForm(fn (Form $form) => CustomerResource::form($form))
-                    ->required(),
-                Forms\Components\TextInput::make('spk_number')
-                    ->label('No SPK')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('spk_date')
-                    ->label('Tanggal SPK')
-                    ->required(),
-                Forms\Components\Select::make('delivery_term')
-                    ->label('Term Pengiriman')
-                    ->options([
-                        'dtd' => 'Door to Door',
-                        'dtp' => 'Door to Port',
-                        'ptd' => 'Port to Door',
-                        'ptp' => 'Port to Port',
-                      ])
-                    ->required(),
-                Forms\Components\TextInput::make('total_kg')
-                    ->label('Quantity (Kg)')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('total_bag')
-                    ->label('Quantity (Bag)')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\Select::make('loading_location_id')
-                    ->label('Lokasi Muat')
-                    ->relationship(name:'locations', titleAttribute:'address')
-                    ->searchable()
-                    ->preload()
-                    ->createOptionForm(fn (Form $form) => LocationResource::form($form))
-                    ->default(null),
-                Forms\Components\Textarea::make('note')
-                    ->label('Keterangan')
-                    ->columnSpanFull(),
-            ]);
+                Group::make()
+                    ->schema([
+                        Section::make('Order SPK')
+                            ->schema([
+                                Forms\Components\Select::make('customer_id')
+                                    ->label('Customer')
+                                    ->relationship(name: 'customers', titleAttribute:'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->createOptionForm(fn (Form $form) => CustomerResource::form($form))
+                                    ->required(),
+                                Forms\Components\TextInput::make('spk_number')
+                                    ->label('No SPK')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\DatePicker::make('spk_date')
+                                    ->label('Tanggal SPK')
+                                    ->required(),
+                                Forms\Components\Select::make('delivery_term')
+                                    ->label('Term Pengiriman')
+                                    ->options([
+                                        'dtd' => 'Door to Door',
+                                        'dtp' => 'Door to Port',
+                                        'ptd' => 'Port to Door',
+                                        'ptp' => 'Port to Port',
+                                    ])
+                                    ->required(),
+                                Forms\Components\TextInput::make('total_kg')
+                                    ->label('Quantity (Kg)')
+                                    ->numeric()
+                                    ->default(null),
+                                Forms\Components\TextInput::make('total_bag')
+                                    ->label('Quantity (Bag)')
+                                    ->numeric()
+                                    ->default(null),
+                                Forms\Components\Select::make('loading_location_id')
+                                    ->label('Lokasi Muat')
+                                    ->relationship(name:'locations', titleAttribute:'address')
+                                    ->searchable()
+                                    ->preload()
+                                    ->createOptionForm(fn (Form $form) => LocationResource::form($form))
+                                    ->default(null),
+                                Forms\Components\Textarea::make('note')
+                                    ->label('Keterangan')
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->columnSpan(['lg' => 3]),
+            ])
+            ->columns(3);
     }
 
     public static function table(Table $table): Table
@@ -272,19 +287,58 @@ class OrderResource extends Resource
                 Infolists\Components\Group::make()
                     ->schema(
                         [
-                            Infolists\Components\Section::make('Informasi Status')
+                            Infolists\Components\Section::make('Informasi Dokumen')
                                 ->schema([
-                                    Infolists\Components\TextEntry::make('created_at')
-                                        ->label('Created at')
-                                        ->dateTime()
-                                        ->icon('heroicon-m-calendar'),
-                                    Infolists\Components\TextEntry::make('updated_at')
-                                        ->label('Updated at')
-                                        ->dateTime()
-                                        ->icon('heroicon-m-calendar-days'),
+                                    Infolists\Components\TextEntry::make('upload_file_dummy')
+                                        ->label('Upload File')
+                                        ->hintAction(
+                                            Infolists\Components\Actions\Action::make('uploadFile')
+                                                ->label('Upload File')
+                                                ->icon('heroicon-o-arrow-up-tray')
+                                                ->modalHeading('Upload File Pendukung')
+                                                ->form([
+                                                    Forms\Components\FileUpload::make('file')
+                                                        ->label('File')
+                                                        ->disk('public')
+                                                        ->directory('order-files')
+                                                        ->required(),
+                                                    Forms\Components\Select::make('file_type')
+                                                        ->label('Jenis File')
+                                                        ->options([
+                                                            'spk' => 'SPK',
+                                                            'surat_jalan' => 'Surat Jalan',
+                                                            'lainnya' => 'Lainnya',
+                                                        ]),
+                                                ])
+                                                ->action(function (array $data, $record) {
+                                                    $originalPath = $data['file']; // Sudah berupa relative path dari Filament (mis: order-files/xxx.pdf)
+                                                    $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+                                                    $randomFileName = Str::random(12) . '.' . $extension;
+                                                    $newPath = 'order-files/' . $randomFileName;
+
+                                                    // Rename file di storage
+                                                    Storage::disk('public')->move($originalPath, $newPath);
+
+                                                    $record->files()->create([
+                                                        'file_name' => $randomFileName,
+                                                        'file_type' => $data['file_type'],
+                                                        'file_path' => $newPath,
+                                                    ]);
+
+                                                    Notification::make()
+                                                        ->title('File berhasil diupload')
+                                                        ->success()
+                                                        ->send();
+                                                })
+                                        )
+                                        ->columnSpanFull(),
+
+                                    ViewEntry::make('files')
+                                        ->label('Dokumen')
+                                        ->view('filament.infolists.order-files')
+                                        ->columnSpanFull(),
                                 ]),
-                        ]
-                    )
+                        ])
                     ->columnSpan(['lg' => 1]),
             ])
             ->columns(3);

@@ -23,7 +23,6 @@ class ExportOrderProsesController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Order Proses');
 
-        // Judul laporan
         $sheet->setCellValue('B1', 'LAPORAN ORDER DO/PO/SO & TRUCKING');
         $sheet->mergeCells('B1:J1');
         $sheet->getStyle('B1')->applyFromArray([
@@ -46,7 +45,6 @@ class ExportOrderProsesController extends Controller
         ])->get();
 
         foreach ($orderList as $orderProses) {
-            // Header DO/PO
             $sheet->setCellValue("B{$row}", 'DO Number:');
             $sheet->setCellValue("C{$row}", $orderProses->do_number ?? '-');
             $sheet->setCellValue("E{$row}", 'Customer:');
@@ -63,7 +61,6 @@ class ExportOrderProsesController extends Controller
             $sheet->setCellValue("F{$row}", optional($orderProses->locations)->name ?? '-');
             $row += 2;
 
-            // === Header Tabel 2 Baris ===
             $headerRow1 = $row;
             $headerRow2 = $row + 1;
             $sheet->setCellValue("B{$headerRow1}", 'Tanggal');
@@ -75,14 +72,14 @@ class ExportOrderProsesController extends Controller
             $sheet->setCellValue("H{$headerRow1}", 'Tara');
             $sheet->setCellValue("I{$headerRow1}", 'Netto');
             $sheet->setCellValue("J{$headerRow1}", 'Keterangan');
-            // Subheader Bag
+
             $sheet->setCellValue("E{$headerRow2}", 'Kirim');
             $sheet->setCellValue("F{$headerRow2}", 'Terima');
-            // Merge vertikal kolom lain
+
             foreach (['B','C','D','G','H','I','J'] as $col) {
                 $sheet->mergeCells("{$col}{$headerRow1}:{$col}{$headerRow2}");
             }
-            // Styling Header
+
             $sheet->getStyle("B{$headerRow1}:J{$headerRow2}")->applyFromArray([
                 'font' => ['bold' => true],
                 'alignment' => [
@@ -94,7 +91,6 @@ class ExportOrderProsesController extends Controller
             ]);
             $row = $headerRow2 + 1;
 
-            // === Detail Trucking ===
             foreach ($orderProses->order_detail as $detail) {
                 $tanggal = Carbon::parse($detail->date_detail)->translatedFormat('d F Y');
                 $sheet->setCellValue("B{$row}", $tanggal);
@@ -118,7 +114,6 @@ class ExportOrderProsesController extends Controller
                 $row++;
             }
 
-            // === TOTAL per DO ===
             $totalBagSend = $orderProses->order_detail->sum('bag_send');
             $totalBagReceived = $orderProses->order_detail->sum('bag_received');
             $totalBruto = $orderProses->order_detail->sum('bruto');
@@ -150,14 +145,12 @@ class ExportOrderProsesController extends Controller
             $row += 3;
         }
 
-        // AutoSize kolom selain Bag
         foreach (range('B', 'J') as $col) {
             if (!in_array($col, ['E', 'F'])) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
         }
 
-        // Kolom Bag Kirim & Terima = Lebar Tetap Sama
         $sheet->getColumnDimension('E')->setWidth(12);
         $sheet->getColumnDimension('F')->setWidth(12);
 

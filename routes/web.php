@@ -18,7 +18,12 @@ Route::get('/labor-payments/{laborPayment}/receipt', [App\Http\Controllers\Labor
     ->name('labor-payments.receipt');
 
 Route::get('/export/order-proses', [ExportOrderProsesController::class, 'export']);
+Route::delete('/admin/files/{file}', function (\App\Models\OrderFile $file) {
+    Storage::disk('public')->delete($file->file_path);
+    $file->delete();
 
+    return back()->with('success', 'File berhasil dihapus.');
+})->name('filament.resources.files.destroy');
 Route::get('/nota/{orderDetail}/cetak', [NotaController::class, 'cetak'])->name('nota.cetak');
 // Route::get('/', function () {
 //     return view('welcome');

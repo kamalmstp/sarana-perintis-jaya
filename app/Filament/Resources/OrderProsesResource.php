@@ -332,6 +332,109 @@ class OrderProsesResource extends Resource
             ]);
     }
 
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Group::make()
+                    ->schema([
+                        Infolists\Components\Section::make('Informasi Order DO/PO/SO')
+                            ->schema([
+                                Infolists\Components\Grid::make()
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('orders.customers.name')
+                                            ->label('Customer')
+                                            ->icon('heroicon-o-building-office'),
+                                        
+                                        Infolists\Components\TextEntry::make('orders.spk_number')
+                                            ->label('No SPK')
+                                            ->icon('heroicon-o-clipboard-document'),
+
+                                        Infolists\Components\TextEntry::make('custom_number')
+                                            ->label('Nomor Order')
+                                            ->icon('heroicon-o-clipboard-document-list')
+                                            ->html(),
+
+                                        Infolists\Components\TextEntry::make('tally_proses')
+                                            ->label('Nama Tally'),
+                                    ]),
+
+                                Infolists\Components\Grid::make()
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('item_proses')
+                                            ->label('Item')
+                                            ->icon('heroicon-o-cube'),
+
+                                        Infolists\Components\TextEntry::make('total_kg_proses')
+                                            ->label('Quantity')
+                                            ->suffix(' Kg'),
+                                    ]),
+
+                                Infolists\Components\TextEntry::make('locations.address')
+                                    ->label('Lokasi Tujuan')
+                                    ->icon('heroicon-o-map-pin'),
+
+                                Infolists\Components\TextEntry::make('note_proses')
+                                    ->label('Catatan')
+                                    ->markdown(),
+                            ]),
+                    ])
+                    ->columnSpan(['lg' => 2]),
+
+                Infolists\Components\Group::make()
+                    ->schema([
+                        Infolists\Components\Section::make('Pengiriman')
+                            ->schema([
+                                Infolists\Components\TextEntry::make('tarif')
+                                    ->label('Tarif')
+                                    ->icon('heroicon-o-currency-dollar')
+                                    ->money('Rp ')
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('type_proses')
+                                    ->label('Tipe Pengiriman')
+                                    ->formatStateUsing(fn ($state) => match ($state) {
+                                        'gudang' => 'Gudang',
+                                        'kapal' => 'Kapal',
+                                        'container' => 'Container',
+                                        default => '—',
+                                    })
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('warehouse_proses')
+                                    ->label('Informasi Gudang')
+                                    ->visible(fn ($record) => $record->type_proses === 'gudang')
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('vessel_name_proses')
+                                    ->label('Nama Kapal')
+                                    ->visible(fn ($record) => $record->type_proses === 'kapal')
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('operation_proses')
+                                    ->label('Proses Container')
+                                    ->visible(fn ($record) => $record->type_proses === 'container')
+                                    ->formatStateUsing(fn ($state) => match ($state) {
+                                        'bongkar' => 'Bongkar',
+                                        'teruskan' => 'Teruskan',
+                                        default => null,
+                                    })
+                                    ->placeholder('—'),
+
+                                Infolists\Components\TextEntry::make('total_container_proses')
+                                    ->label('Jumlah Container')
+                                    ->visible(fn ($record) =>
+                                        $record->type_proses === 'container' &&
+                                        $record->operation_proses === 'teruskan'
+                                    )
+                                    ->placeholder('—'),
+                            ]),
+                    ])
+                    ->columnSpan(['lg' => 1]),
+            ])
+            ->columns(3);
+    }
+
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

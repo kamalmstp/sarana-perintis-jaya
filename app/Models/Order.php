@@ -33,6 +33,22 @@ class Order extends Model
     {
         return $this->hasMany(OrderProses::class);
     }
+
+    public function files()
+    {
+        return $this->hasMany(OrderFile::class);
+    }
+
+    public function getFormattedFilesAttribute()
+    {
+        return $this->files->map(function ($file) {
+            return [
+                'id' => $file->id,
+                'type' => $file->file_type,
+                'path' => $file->file_path,
+            ];
+        })->values()->toArray();
+    }
     
     public function customers(): BelongsTo
     {

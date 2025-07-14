@@ -6,26 +6,15 @@ use App\Filament\Forms\BiayaTruckingForm;
 use Filament\Notifications\Notification;
 use App\Filament\Resources\OrderDetailResource\Pages;
 use App\Filament\Resources\OrderDetailResource\RelationManagers;
-use App\Models\OrderDetail;
-use App\Models\Truck;
-use App\Models\OrderProses;
+use App\Models\{OrderDetail, Truck, OrderProses};
 use Filament\Forms;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Form;
+use Filament\Forms\{Get, Set, Form};
+use Filament\Forms\Components\{Group, Section, Fieldset, Hidden, Radio, TextInput, Select};
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\{Action, ActionGroup};
 use Filament\Tables\Columns\Summarizers\Sum;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
@@ -71,7 +60,7 @@ class OrderDetailResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['driverCost', 'trucks', 'rentalCost.rental']);
+            ->with(['driverCost', 'trucks', 'order_proses', 'rentalCost.rental']);
     }
 
     public static function form(Form $form): Form

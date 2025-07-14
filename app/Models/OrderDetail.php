@@ -28,6 +28,10 @@ class OrderDetail extends Model
       'netto',
       'status_detail',
       'note_detail',
+      'container_number',
+      'seal_number',
+      'lock_number',
+      'vessel_name',
       'status',
       'selesai_at',
       'is_selesai'
@@ -77,8 +81,18 @@ class OrderDetail extends Model
     {
         $tarif = $this->order_proses?->tarif ?? 0;
         $netto = $this->bruto - $this->tara;
-        
-        return $tarif * $netto;
+
+        if ($this->getIsContainerForwardAttribute()) {
+            return $tarif * 1;
+        } else {
+            return $tarif * $netto;
+        }
+    }
+
+    public function getIsContainerForwardAttribute(): bool
+    {
+        return $this->order_proses->type_proses === 'container'
+            && $this->order_proses->operation_proses === 'teruskan';
     }
 
     public static function getStatuses(): array

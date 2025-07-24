@@ -6,6 +6,7 @@ use App\Filament\Resources\OrderProsesResource;
 use App\Filament\Resources\OrderDetailResource;
 use App\Models\{OrderDetail, Truck, OrderProses};
 use Filament\Actions;
+use Filament\Tables\Actions\{Action, ActionGroup};
 use Filament\Forms;
 use Filament\Forms\{Get, Set, Form};
 use Filament\Forms\Components\{Group, Section, Fieldset, Hidden, Radio, TextInput, Select};
@@ -295,9 +296,32 @@ class ManageOrderDetail extends ManageRelatedRecords
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Action::make('selesaikan')
+                            ->label('Selesaikan')
+                            ->icon('heroicon-m-check-circle')
+                            ->color('success')
+                            ->visible(fn ($record) => !
+                                $record->is_selesai)
+                            ->requiresConfirmation()
+                            ->action(function ($record){
+                                $record->update([
+                                    'is_selesai' => true,
+                                    'selesai_at' => now(),
+                                ]);
+
+                                $record->updateStatusAutomatically();
+
+                                Notification::make()
+                                    ->title('Order Berhasil diselesaikan')
+                                    ->success()
+                                    ->send();
+                            }),
+
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make()

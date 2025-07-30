@@ -213,7 +213,8 @@ class OrderProsesResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('locations.name')
                     ->label('Lokasi Tujuan')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('tarif')
                     ->label('Tarif')
                     ->formatStateUsing(fn ($state) => 'Rp '. number_format($state, 0, ',', '.'))

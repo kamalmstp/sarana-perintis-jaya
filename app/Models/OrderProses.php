@@ -9,9 +9,6 @@ use Illuminate\Support\Facades\Storage;
 
 class OrderProses extends Model
 {
-    //
-
-    // add fillable
     protected $fillable = [
       'order_id',
       'do_number',
@@ -21,6 +18,9 @@ class OrderProses extends Model
       'total_kg_proses',
       'total_bag_proses',
       'delivery_location_id',
+      'location_dtp_id',
+      'location_ptp_id',
+      'location_ptd_id',
       'type_proses',
       'tally_proses',
       'tarif',
@@ -33,9 +33,9 @@ class OrderProses extends Model
       'invoice_status',
       'note_proses',
     ];
-    // add guaded
+
     protected $guarded = ['id'];
-    // add hidden
+    
     protected $hidden = ['created_at', 'updated_at'];
     
     public function orders(): BelongsTo
@@ -47,7 +47,22 @@ class OrderProses extends Model
     {
         return $this->belongsTo(Location::class, 'delivery_location_id');
     }
-    
+
+    public function locationsDtp(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_dtp_id');
+    }
+
+    public function locationsPtp(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_ptp_id');
+    }
+
+    public function locationsPtd(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_ptd_id');
+    }
+
     public function order_detail(): HasMany
     {
         return $this->hasMany(OrderDetail::class);
@@ -61,6 +76,12 @@ class OrderProses extends Model
     public function getTotalNettoAttribute()
     {
         return $this->order_detail()->sum('netto');
+    }
+
+    public function getTotalTagihanAttribute()
+    {
+        $total = $this->tarif * $this->total_kg_proses;
+        return $total;
     }
 
     public function getCustomLabelAttribute()
@@ -87,7 +108,24 @@ class OrderProses extends Model
         return implode('<br>', $parts) ?: '—';
     }
 
+    public function getCustomLocationDtdAttribute()
+    {
+        $parts = [];
 
+        if ($this->locationsDtp) {
+            $parts[] = "DTP: {$this->locationsDtp->name}";
+        }
+
+        if ($this->locationsPtp) {
+            $parts[] = "PTP: {$this->locationsPtp->name}";
+        }
+
+        if ($this->locationsPtd) {
+            $parts[] = "PTD: {$this->locationsPtd->name}";
+        }
+
+        return implode('<br>', $parts) ?: '—';
+    }
 
     public function getStatusAttribute(): string
     {
@@ -95,15 +133,7 @@ class OrderProses extends Model
 
         if ($total === 0) {
             return 'belum_dimulai';
-        }
-
-        $selesaiCount = $this->order_detail()->where('status', 'selesai')->count();
-
-        if ($selesaiCount === 0) {
-            return 'belum_dimulai';
-        }
-
-        if ($selesaiCount < $total) {
+        }else {
             return 'dalam_proses';
         }
 

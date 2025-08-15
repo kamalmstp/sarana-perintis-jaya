@@ -2,41 +2,38 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\OrderProsesResource\Pages;
-use App\Filament\Resources\OrderProsesResource\RelationManagers;
-use App\Filament\Resources\OrderProsesResource\RelationManagers\OrderDetailRelationManager;
-use App\Models\OrderProses;
-use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use Filament\Notifications\Notification;
-use Filament\Forms;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Get;
-use Filament\Forms\Form;
-use Filament\Infolists;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\Resource;
-use Filament\Pages\SubNavigationPosition;
+use App\Filament\Resources\OrderProsesResource\{Pages, RelationManagers};
+use App\Filament\Resources\OrderProsesResource\RelationManagers\{
+    OrderDetailRelationManager,
+    DtpOrderDetailsRelationManager,
+    PtpOrderDetailsRelationManager,
+    PtdOrderDetailsRelationManager
+};
+use App\Exports\OrderProsesExport;
+use App\Models\{Order, OrderProses, Invoice, InvoiceItem};
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\{Action, ActionGroup, BulkAction};
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\RichContent;
+use Filament\Forms;
+use Filament\Forms\{Get, Set, Form};
+use Filament\Forms\Components\{Group, Section, Fieldset, Select};
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Infolists\Components\{TextEntry, RichContent};
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\{Builder, SoftDeletingScope};
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use App\Exports\OrderProsesExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Guava\FilamentNestedResources\Concerns\NestedResource;
 
 class OrderProsesResource extends Resource
 {
+    //use NestedResource;
+
     protected static ?string $model = OrderProses::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
@@ -76,8 +73,17 @@ class OrderProsesResource extends Resource
                                 ->label('No SPK')
                                 ->relationship(name:'orders', titleAttribute:'spk_number')
                                 ->searchable()
+                                ->reactive()
+                                ->afterStateHydrated(function ($state, Set $set) {
+                                    if ($state){
+                                        $set('is_antar_pulau', Order::find($state)?->is_antar_pulau);
+                                    }
+                                })
                                 ->preload()
                                 ->required(),
+
+                                Forms\Components\Hidden::make('is_antar_pulau')
+                                    ->reactive(),
 
                                 Fieldset::make('Nomor Order')
                                 ->schema([
@@ -117,13 +123,38 @@ class OrderProsesResource extends Resource
                                         ->default(null),
                                 ]),
 
+                                Fieldset::make('Rute Pengiriman')
+                                ->schema([
+                                    Forms\Components\Select::make('location_dtp_id')
+                                        ->label('Lokasi Tujuan DTP')
+                                        ->relationship(name:'locationsDtp', titleAttribute:'address')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm(fn (Form $form) => LocationResource::form($form)),
+                                    
+                                    Forms\Components\Select::make('location_ptp_id')
+                                        ->label('Lokasi Tujuan PTP')
+                                        ->relationship(name:'locationsPtp', titleAttribute:'address')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm(fn (Form $form) => LocationResource::form($form)),
+
+                                    Forms\Components\Select::make('location_ptd_id')
+                                        ->label('Lokasi Tujuan PTD')
+                                        ->relationship(name:'locationsPtd', titleAttribute:'address')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm(fn (Form $form) => LocationResource::form($form)),
+                                ])
+                                ->visible(fn (Get $get) => $get('is_antar_pulau') === 1),
+
                                 Forms\Components\Select::make('delivery_location_id')
                                 ->label('Lokasi Tujuan')
                                 ->relationship(name:'locations', titleAttribute:'address')
                                 ->searchable()
+                                ->visible(fn (Get $get) => $get('is_antar_pulau') === 0)
                                 ->preload()
-                                ->createOptionForm(fn (Form $form) => LocationResource::form($form))
-                                ->required(),
+                                ->createOptionForm(fn (Form $form) => LocationResource::form($form)),
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
@@ -206,7 +237,7 @@ class OrderProsesResource extends Resource
                     ->label('Quantity')
                     ->formatStateUsing(function ($record){
                         $kg = $record->total_kg_proses ? number_format($record->total_kg_proses, 0, '.', '.') . ' Kg' : '- Kg' ;
-                        $bag = $record->total_bag_proses ? number_format($record->total_bag_proses, 0, '.', '.') . ' Bag' : '- Bag' ;
+                        $bag = $record->total_bag_proses ? number_format($record->total_bag_proses, 0, '.', '.') . ' Bag' : '' ;
 
                         return collect([$kg, $bag])->filter()->join('<br>');
                     })->html()
@@ -222,12 +253,17 @@ class OrderProsesResource extends Resource
                     ->alignEnd(),
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
-                    ->getStateUsing(fn ($record) => $record->status) // karena ini accessor, bukan field database
-                    ->formatStateUsing(fn (?string $state) => [
-                        'belum_dimulai' => 'Belum Dimulai',
-                        'dalam_proses' => 'Dalam Proses',
-                        'selesai' => 'Selesai',
-                    ][$state] ?? 'Tidak diketahui')
+                    ->getStateUsing(fn ($record) => $record->status)
+                    ->formatStateUsing(function (?string $state, $record) {
+                        $count = $record->order_detail()->count();
+                        $label = [
+                            'belum_dimulai' => 'Belum Dimulai',
+                            'dalam_proses' => 'Dalam Proses',
+                            'selesai' => 'Selesai',
+                        ][$state] ?? 'Tidak diketahui';
+
+                        return "{$label} ({$count})";
+                    })
                     ->color(fn (?string $state) => match ($state) {
                         'belum_dimulai' => 'info',
                         'dalam_proses' => 'danger',
@@ -300,7 +336,7 @@ class OrderProsesResource extends Resource
                         BulkAction::make('createInvoice')
                         ->label('Buat Invoice')
                         ->action(function (Collection $records, array $data) {
-                            // Ambil customer dari salah satu record (asumsi sama semua)
+                            
                             $customer = $records->first()->order->spk->customer ?? null;
 
                             $invoice = Invoice::create([
@@ -316,7 +352,7 @@ class OrderProsesResource extends Resource
                                     'invoice_id' => $invoice->id,
                                     'order_detail_id' => $record->id,
                                     'description' => "Pengiriman {$record->order->do_number} ke {$record->destination}",
-                                    'amount' => $record->tarif, // pastikan kamu punya field ini
+                                    'amount' => $record->tarif,
                                 ]);
                             }
 
@@ -373,7 +409,14 @@ class OrderProsesResource extends Resource
 
                                 Infolists\Components\TextEntry::make('locations.address')
                                     ->label('Lokasi Tujuan')
-                                    ->icon('heroicon-o-map-pin'),
+                                    ->icon('heroicon-o-map-pin')
+                                    ->visible(fn ($record) => $record->orders->is_antar_pulau === 0),
+
+                                Infolists\Components\TextEntry::make('custom_location_dtd')
+                                    ->label('Lokasi Tujuan')
+                                    ->icon('heroicon-o-map-pin')
+                                    ->html()
+                                    ->visible(fn ($record) => $record->orders->is_antar_pulau === 1),
 
                                 Infolists\Components\TextEntry::make('note_proses')
                                     ->label('Catatan')
@@ -389,7 +432,17 @@ class OrderProsesResource extends Resource
                                 Infolists\Components\TextEntry::make('tarif')
                                     ->label('Tarif')
                                     ->icon('heroicon-o-currency-dollar')
-                                    ->money('Rp ')
+                                    ->prefix('Rp ')
+                                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.'))
+                                    ->visible(fn ($record) => $record->orders?->is_antar_pulau === 0)
+                                    ->placeholder('—'),
+                                
+                                Infolists\Components\TextEntry::make('total_tagihan')
+                                    ->label('Tagihan')
+                                    ->icon('heroicon-o-currency-dollar')
+                                    ->prefix('Rp ')
+                                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.'))
+                                    ->visible(fn ($record) => $record->orders?->is_antar_pulau === 1)
                                     ->placeholder('—'),
 
                                 Infolists\Components\TextEntry::make('type_proses')
@@ -449,6 +502,10 @@ class OrderProsesResource extends Resource
     {
         return [
             OrderDetailRelationManager::class,
+
+            DtpOrderDetailsRelationManager::class,
+            PtpOrderDetailsRelationManager::class,
+            PtdOrderDetailsRelationManager::class,
         ];
     }
 
@@ -462,4 +519,5 @@ class OrderProsesResource extends Resource
             'order-detail' => Pages\ManageOrderDetail::route('/{record}/order-detail'),
         ];
     }
+
 }

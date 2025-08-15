@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('item_proses')->nullable();
             $table->decimal('total_kg_proses', 10, 2)->nullable();
             $table->integer('total_bag_proses')->nullable();
-            $table->foreignId('delivery_location_id')
+            $table->foreignId('delivery_location_id')->nullable()
             ->constrained('locations', 'id')
             ->cascadeOnUpdate()->cascadeOnDelete();
             $table->enum('type_proses',['gudang','kapal','container']);

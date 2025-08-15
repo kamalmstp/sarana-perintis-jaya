@@ -13,13 +13,7 @@ use Filament\Infolists\Components\RichContent;
 class ViewOrderProses extends ViewRecord
 {
     protected static string $resource = OrderProsesResource::class;
-    protected static bool $canCreateAnother = false;
-
-    //customize redirect after create
-    // public function getRedirectUrl(): string
-    // {
-    //     return $this->getResource()::getUrl('index');
-    // }
+    protected static bool $canCreateAnother = true;
 
     protected function getViewContent(): array
     {

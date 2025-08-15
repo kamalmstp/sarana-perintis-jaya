@@ -9,14 +9,13 @@ use Illuminate\Support\Facades\Storage;
 
 class Order extends Model
 {
-    //
-
-    // add fillable
+    
     protected $fillable = [
       'customer_id',
       'spk_number',
       'spk_date',
       'delivery_term',
+      'is_antar_pulau',
       'item',
       'period',
       'total_kg',

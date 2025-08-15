@@ -1,17 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\OrderResource\Pages;
+namespace App\Filament\Resources\ShippingLineResource\Pages;
 
-use App\Filament\Resources\OrderResource;
+use App\Filament\Resources\ShippingLineResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use Guava\FilamentNestedResources\Concerns\NestedPage;
 
-class EditOrder extends EditRecord
+class EditShippingLine extends EditRecord
 {
-    // use NestedPage;
-    
-    protected static string $resource = OrderResource::class;
+    protected static string $resource = ShippingLineResource::class;
 
     protected function getHeaderActions(): array
     {

@@ -2,43 +2,37 @@
 
 namespace App\Filament\Resources\OrderProsesResource\RelationManagers;
 
-use App\Models\{OrderDetail, Truck, OrderProses};
+use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\{OrderDetail, Truck, OrderProses};
+use App\Filament\Resources\{TruckResource, DriverResource};
 use Filament\Forms;
 use Filament\Forms\{Get, Set, Form};
 use Filament\Forms\Components\{Group, Section, Fieldset, Hidden, Radio, TextInput, Select};
-use Filament\Resources\RelationManagers\RelationManager;
-use App\Filament\Resources\OrderDetailResource;
-use Filament\Tables\Actions\{Action, ActionGroup};
-use App\Filament\Resources\{TruckResource, DriverResource};
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Filters\Filter;
-use Filament\Resources\Resource;
+use Filament\Tables\Actions\{Action, ActionGroup};
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 
-class OrderDetailRelationManager extends RelationManager
+class DtpOrderDetailsRelationManager extends RelationManager
 {
     protected static string $relationship = 'order_detail';
-    protected static ?string $title = 'Detail Proses (Trucking)';
-    protected static ?string $label = 'Trucking';
-    protected static ?string $pluralLabel = 'Trucking';
-    
+    protected static ?string $title = 'Door To Port';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('segment', 'DTP');
+    }
+
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        return $ownerRecord->orders?->is_antar_pulau === 0;
+        return $ownerRecord->orders?->is_antar_pulau === 1;
     }
 
     public function form(Form $form): Form
     {
-        $orderProses = $this->getOwnerRecord();
-
-        $isContainerForward = $orderProses?->type_proses === 'container'
-            && $orderProses?->operation_proses === 'teruskan';
-
         return $form
             ->schema([
                 Group::make()
@@ -54,8 +48,11 @@ class OrderDetailRelationManager extends RelationManager
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->default(fn () => request()->input('ownerRecord.id'))
-                                        ->visible(fn () => !request()->filled('ownerRecord')),
+                                        ->default(fn (RelationManager $livewire) => $livewire->ownerRecord->id),
+
+                                    Forms\Components\Hidden::make('segment_type')
+                                        ->default('DTP')
+                                        ->dehydrated(),
                                 ]),
 
                                 Fieldset::make('Trucking')
@@ -91,7 +88,6 @@ class OrderDetailRelationManager extends RelationManager
                                             ->default(null),
                                     ]),
 
-                                ...(!$isContainerForward ? [
                                     Fieldset::make('Pengiriman')
                                         ->schema([
                                             Forms\Components\TextInput::make('bag_send')
@@ -130,20 +126,6 @@ class OrderDetailRelationManager extends RelationManager
                                                 }),
                                         ])
                                         ->columns(3),
-                                ] : []),
-
-                                ...($isContainerForward ? [
-                                    Fieldset::make('Container')
-                                    ->schema([
-                                        TextInput::make('container_number')
-                                            ->label('Nomor Container'),
-                                        TextInput::make('seal_number')
-                                            ->label('Nomor Segel'),
-                                        TextInput::make('lock_number')
-                                            ->label('Nomor Gembok'),
-                                    ])
-                                    ->columns(3),
-                                ] : []),
 
                                 Forms\Components\RichEditor::make('note_detail')
                                     ->label('Keterangan')
@@ -151,89 +133,16 @@ class OrderDetailRelationManager extends RelationManager
                             ]),
                     ])
                     ->columnSpan(['lg' => 2]),
-
-                Group::make()
-                    ->schema([
-                        Section::make('Biaya')
-                            ->schema([
-                                TextInput::make('uang_sangu')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
-                                    ->label('Uang Sangu'),
-
-                                TextInput::make('uang_jalan')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
-                                    ->label('Uang Jalan'),
-
-                                TextInput::make('uang_bbm')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
-                                    ->label('Uang BBM'),
-
-                                TextInput::make('uang_kembali')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
-                                    ->label('Uang Kembali'),
-
-                                TextInput::make('gaji_supir')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'company')
-                                    ->label('Gaji Supir'),
-
-                                TextInput::make('no_kwitansi')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
-                                    ->label('No Kwitansi'),
-
-                                TextInput::make('no_surat_jalan')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
-                                    ->label('No Surat Jalan'),
-
-                                Select::make('rental_id')
-                                    ->label('Pemilik')
-                                    ->relationship('rentalCost.rental', 'name')
-                                    ->preload()
-                                    ->searchable()
-                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
-                                    ->createOptionForm([
-                                        TextInput::make('name')->label('Nama'),
-                                        TextInput::make('npwp')->label('NPWP'),
-                                    ])
-                                    ->nullable(),
-
-                                Radio::make('pph')
-                                    ->label('Pajak')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
-                                    ->options([
-                                        '0.2' => 'NPWP',
-                                        '0.05' => 'SKB',
-                                    ]),
-
-                                TextInput::make('tarif_rental')
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->visible(fn (Get $get) => $get('ownership') === 'rental')
-                                    ->label('Tarif Rental'),
-                            ])
-                    ])
-
-            ])
-            ->columns(3);
+            ]);
     }
 
     public function table(Table $table): Table
     {
-        $orderProses = $this->getOwnerRecord();
-
-        $isContainerForward = $orderProses?->type_proses === 'container'
-            && $orderProses?->operation_proses === 'teruskan';
-
         return $table
+            ->recordTitleAttribute('Door To Port')
+            ->modifyQueryUsing(fn (Builder $query) => 
+                $query->where('segment_type', 'DTP')
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('date_detail')
                     ->label('Tanggal')
@@ -249,45 +158,23 @@ class OrderDetailRelationManager extends RelationManager
                     })->html()
                     ->sortable(),
 
-                    ...(!$isContainerForward ? [
-                    Tables\Columns\TextColumn::make('bag_send')
-                        ->label('Qty')
-                        ->formatStateUsing(function ($record){
-                            $send = $record->bag_send ? number_format($record->bag_send, 0, '.', '.') . ' Bag' : '- Bag';
-                            $received = $record->bag_received ? number_format($record->bag_received, 0, '.', '.') . ' Bag' : '- Bag';
-                            return collect([$send, $received])->filter()->join('<br>');
-                        })->html()->sortable(),
+                Tables\Columns\TextColumn::make('bag_send')
+                    ->label('Qty')
+                    ->formatStateUsing(function ($record){
+                        $send = $record->bag_send ? number_format($record->bag_send, 0, '.', '.') . ' Bag' : '- Bag';
+                        $received = $record->bag_received ? number_format($record->bag_received, 0, '.', '.') . ' Bag' : '- Bag';
+                        return collect([$send, $received])->filter()->join('<br>');
+                    })->html()->sortable(),
 
-                    Tables\Columns\TextColumn::make('bruto')
-                        ->label('Berat')
-                        ->formatStateUsing(function ($record){
-                            $bruto = $record->bruto ? 'Bruto: ' . number_format($record->bruto, 0, '.', '.') : '-';
-                            $tara = $record->tara ? 'Tara: ' . number_format($record->tara, 0, '.', '.') : '-';
-                            $netto = $record->netto ? 'Netto: ' . number_format($record->netto, 0, '.', '.') : '-';
-                            return collect([$bruto, $tara, $netto])->filter()->join('<br>');
-                        })->html(),
-                ] : []),
-
-                ...($isContainerForward ? [
-                    Tables\Columns\TextColumn::make('container_number')
-                        ->label('Container Info')
-                        ->formatStateUsing(function ($record) {
-                            $container = $record->container_number ?: '-';
-                            $seal = $record->seal_number ?: '-';
-                            $lock = $record->lock_number ?: '-';
-                            return collect([
-                                "Container: $container",
-                                "Seal: $seal",
-                                "Lock: $lock",
-                            ])->filter()->join('<br>');
-                        })->html(),
-                ] : []),
-
-                Tables\Columns\TextColumn::make('total_biaya')
-                    ->label('Tagihan')
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
-                    ->sortable(),
-
+                Tables\Columns\TextColumn::make('bruto')
+                    ->label('Berat')
+                    ->formatStateUsing(function ($record){
+                        $bruto = $record->bruto ? 'Bruto: ' . number_format($record->bruto, 0, '.', '.') : '-';
+                        $tara = $record->tara ? 'Tara: ' . number_format($record->tara, 0, '.', '.') : '-';
+                        $netto = $record->netto ? 'Netto: ' . number_format($record->netto, 0, '.', '.') : '-';
+                        return collect([$bruto, $tara, $netto])->filter()->join('<br>');
+                    })->html(),
+                
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn (?string $state) => [
@@ -305,6 +192,10 @@ class OrderDetailRelationManager extends RelationManager
             ])
             ->filters([
                 
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Tambah Data'),
             ])
             ->actions([
                 ActionGroup::make([
@@ -333,29 +224,11 @@ class OrderDetailRelationManager extends RelationManager
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ]),
-
-            ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make()
-                    ->label('New Data')
-                    ->icon('heroicon-o-plus-circle')
-                    ->fillForm(fn () => [
-                        'order_proses_id' => $this->getOwnerRecord()->id,
-                    ])
-                    ->mutateFormDataUsing(fn (array $data) => [
-                        ...$data,
-                        'order_proses_id' => $this->getOwnerRecord()->id,
-                    ])
-                    ->successNotification(
-                        Notification::make()
-                            ->title('Data berhasil ditambahkan')
-                            ->success()
-                    ),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);;
+            ]);
     }
 }

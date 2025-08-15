@@ -2,36 +2,35 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\OrderResource\Pages;
-use App\Filament\Resources\OrderResource\RelationManagers;
+use App\Filament\Resources\OrderResource\{Pages, RelationManagers};
 use App\Filament\Resources\OrderResource\RelationManagers\OrderProsesRelationManager;
 use App\Models\Order;
-use Filament\Actions\Action;
-use Filament\Support\Enums\ActionSize;
+use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Fieldset;
+use Filament\Forms\{Get, Form};
+use Filament\Forms\Components\{Group, Section, Fieldset};
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\ViewEntry;
-use Filament\Pages\SubNavigationPosition;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\Filter;
+use Filament\Actions\Action;
+use Filament\Support\Enums\ActionSize;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\{Builder, SoftDeletingScope};
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use Guava\FilamentNestedResources\Concerns\NestedResource;
 
 class OrderResource extends Resource
 {
+    //use NestedResource;
+
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
@@ -89,7 +88,12 @@ class OrderResource extends Resource
                                         'ptd' => 'Port to Door',
                                         'ptp' => 'Port to Port',
                                     ])
+                                    ->reactive()
                                     ->required(),
+                                Forms\Components\Checkbox::make('is_antar_pulau')
+                                    ->label('Antar Pulau')
+                                    ->helperText('Centang jika pengiriman DTD ini mencakup pengiriman antar pulau.')
+                                    ->visible(fn (Get $get) => $get('delivery_term') === 'dtd'),
                                 Forms\Components\TextInput::make('total_kg')
                                     ->label('Quantity (Kg)')
                                     ->numeric()
@@ -147,7 +151,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('total_kg')
                     ->formatStateUsing(function ($record){
                         $kg = $record->total_kg ? number_format($record->total_kg, 0, '.', '.') . ' Kg' : '- Kg' ;
-                        $bag = $record->total_bag ? number_format($record->total_bag, 0, '.', '.') . ' Bag' : '- Bag' ;
+                        $bag = $record->total_bag ? number_format($record->total_bag, 0, '.', '.') . ' Bag' : '' ;
 
                         return collect([$kg, $bag])->filter()->join('<br>');
                     })->html()

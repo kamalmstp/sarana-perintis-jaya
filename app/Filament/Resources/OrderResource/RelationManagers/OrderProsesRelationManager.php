@@ -81,11 +81,16 @@ class OrderProsesRelationManager extends RelationManager
                 Tables\Columns\BadgeColumn::make('status')
                     ->label('Status')
                     ->getStateUsing(fn ($record) => $record->status)
-                    ->formatStateUsing(fn (?string $state) => [
-                        'belum_dimulai' => 'Belum Dimulai',
-                        'dalam_proses' => 'Dalam Proses',
-                        'selesai' => 'Selesai',
-                    ][$state] ?? 'Tidak diketahui')
+                    ->formatStateUsing(function (?string $state, $record) {
+                        $count = $record->order_detail()->count();
+                        $label = [
+                            'belum_dimulai' => 'Belum Dimulai',
+                            'dalam_proses' => 'Dalam Proses',
+                            'selesai' => 'Selesai',
+                        ][$state] ?? 'Tidak diketahui';
+
+                        return "{$label} ({$count})";
+                    })
                     ->color(fn (?string $state) => match ($state) {
                         'belum_dimulai' => 'info',
                         'dalam_proses' => 'danger',

@@ -93,7 +93,9 @@ class DriverResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type'),
+                Tables\Columns\TextColumn::make('type')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('identity_number')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
